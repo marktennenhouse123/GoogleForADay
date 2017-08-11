@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+	<meta charset="utf-8" />
+</head>
+<body>
+    <ol>Main problems to solve:
+        <li>Get content and links and remove the HTML.</li>
+        <li>Save it to the database</li>
+        <li>Use recursion to call the function for all the links and sub links</li>
+        <li>Find a way to stop after a certain number of levels</li>
+        <li>Find a way to ignore previously indexed pages.</li>
+    </ol>
+
+    <h2>here is a breakdown on how to solve the above challenges.</h2>
+    <ol>First Level Tasks:
+    <li>First build a page that retrieves the content from a URL</li>
+    <li>Add a function that retrieves ONLY the links from the page</li>
+    <li>Add a function that removes the HTML from the page</li>
+    </ol>
+    <ol>Second Level Tasks:
+    <li>Create an object to hold the Links for display in the page.</li>
+    <li>Add another object to hold the keyword name and the count of repeats per page</li>
+    <li>Create a property in the SearchResult that holds the list of keyword hites per page</li>
+    </ol>
+    <ol>Third Level Tasks
+    <li>Add a function to save each Page's Name, Link and ParentID</li>
+    <li>Add a function to save each Keyword and the count per page.</li>
+    <li>Add database tables to hold each link, and another to hold the Keyword, the hits, and the parentID</li>
+
+    </ol>
+    <ol>Fourth Level Tasks
+    <li>Create a loop that retrieves the content for each link found from a parent page</li>
+    <li>For each item in the Links page, save the content and links</li>
+    <li>Create a function for counting the number of levels that the system uses to parse child pages</li>
+    <li>Create queries to retrieve the matches a keyword that returns the keyword and the # of times it occurs on all indexed pages</li>
+    </ol>
+    
+</body>
+</html>

@@ -1,0 +1,198 @@
+﻿@{
+    ViewBag.Title = "Google JR";
+}
+<style>
+    .loadingImage {
+        position: fixed;
+        z-index: 1000;
+        top: 100px;
+        left: 500px;
+        height: 100%;
+        width: 100%;
+    }
+
+
+    table {
+        border-collapse: collapse;
+    }
+
+    .inputStyle {
+        width: 650px;
+    }
+
+    table, th, td {
+        border: 1px solid black;
+    }
+</style>
+<script>
+    var MainApp = angular.module("MainApp", []);
+
+
+    MainApp.controller("SearchController", function ($scope, $http) {
+
+        $scope.pageName = "http://googleforaday.azurewebsites.net/SamplePage.html";
+        //"https://www.theverge.com/search?q=piano";
+        //"http://localhost:50529/SamplePage.html";
+        $scope.results = "";
+        $scope.IndexThePages = function () {
+            var url = "/Home/doPageIndexing";
+            var postData = { pageName: $scope.pageName, pageID: 0 };
+            $scope.ShowLoadingImage(true);
+            $http.post(url, postData)
+            .then(function (data) {
+
+                $scope.ShowLoadingImage(false);
+                alert(data.data);
+                console.log(data);
+            });
+        };
+
+        $scope.displayResults = function (data) {
+
+            console.log(data.data);
+            $scope.ShowLoadingImage(false);
+            $scope.results = data.data;
+        };
+
+        $scope.doSearch = function () {
+            var url = "/home/RunSearch";
+            var postData = { keyword: $scope.keyword };
+            $scope.ShowLoadingImage(true);
+            $http.post(url, postData)
+            .then(function (data) {
+
+                $scope.displayResults(data);
+            });
+
+        }
+        $scope.ShowLoadingImage = function (makeVisible) {
+            if (makeVisible) {
+                $("#loadingImage").show();
+            }
+            else {
+                $("#loadingImage").hide();
+
+            }
+
+        }
+
+        $scope.HideAppLog = function () {
+            $("#divAppLog").hide();
+        }
+
+        $scope.ShowAppLog = function () {
+
+            var url = "/Home/GetAppLog";
+
+
+            $scope.ShowLoadingImage(true);
+            $http.post(url, '')
+        .then(function (data) {
+            $scope.logResults = data.data;
+            $scope.ShowLoadingImage(false);
+            $("#divAppLog").show();
+        })
+        }
+
+        $scope.ClearAppLog = function () {
+            var url = "/Home/ClearAppLog";
+            $scope.ShowLoadingImage(true);
+            $http.post(url, '')
+            .then(function (data) {
+                $scope.ShowLoadingImage(false);
+                alert(data.data);
+                $scope.logResults = "";
+
+            });
+        }
+
+        $scope.ClearAll = function () {
+
+            var url = "/Home/ClearAll";
+            var postData = {};
+            $scope.ShowLoadingImage(true);
+            $http.post(url, postData)
+            .then(function (data) {
+                $scope.results = "";
+
+                $scope.ShowLoadingImage(false);
+                alert(data.data);
+            })
+        };
+
+    });
+
+
+
+
+
+</script>
+
+<div ng-app="MainApp" ng-controller="SearchController">
+    <br />
+    <br />
+    Index this Page: &nbsp;<input type="text" class="inputStyle" ng-model="pageName" /> <br />
+    <br />
+    <button ng-click="IndexThePages()">Run Indexing</button>  &nbsp;&nbsp;
+    <button ng-click="ClearAll()">Reset</button> &nbsp;&nbsp;
+    <button ng-click="ClearAppLog()">Clear App Log</button>
+    <button ng-click="ShowAppLog()">Show App Log</button>
+    <button ng-click="HideAppLog()">Hide App Log</button>
+    <a href="~/SamplePage.html">Sample page 1</a> &nbsp; &nbsp; <a href="~/SamplePage2.html">Sample page 2</a> &nbsp;&nbsp;<a href="~/SamplePage3.html">Sample page 3</a>
+    <br />
+    <div id="loadingImage" class="modal loadingImage">
+        <p><img src="~/Content/LoadingImage.gif" /> Please Wait</p>
+    </div>
+    <br />
+    Search Indexed Pages: &nbsp;<input type="text" class="inputStyle" ng-model="keyword" /> <br />
+    <br />
+    <button ng-click="doSearch()">Search</button>
+    <br />
+    <table>
+        <tr>
+            <td>
+                <table>
+                    <tr>
+                        <td>Page</td>
+                        <td>Keyword</td>
+                        <td>Count</td>
+                    </tr>
+                    <tr ng-repeat="item in results">
+                        <td>
+                            {{item.PageName}}
+                        </td>
+                        <td>{{item.Keyword}}</td>
+                        <td>{{item.Rank}}</td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <div id="divAppLog">
+                    <table>
+                        <tr>
+                            <td>Function</td>
+                            <td>Page</td>
+                            <td>FullText</td>
+                            <td>ErrorText</td>
+                            <td>DateCreated</td>
+
+                        </tr>
+                        <tr ng-repeat="item in logResults">
+                            <td>
+                                {{item.FunctionName}}
+                            </td>
+                            <td>{{item.PageName}}</td>
+                            <td>{{item.Page}}</td>
+                            <td>{{item.FullMessage}}</td>
+                            <td>{{item.MessageText}}</td>
+
+
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+
+</div>

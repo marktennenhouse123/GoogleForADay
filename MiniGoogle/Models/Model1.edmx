@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="CloudDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="AppLog">
+          <Key>
+            <PropertyRef Name="MessageID" />
+          </Key>
+          <Property Name="MessageID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="MessageText" Type="nvarchar" MaxLength="800" />
+          <Property Name="FullMessage" Type="nvarchar" MaxLength="1500" />
+          <Property Name="FunctionName" Type="varchar" MaxLength="100" />
+          <Property Name="PageName" Type="varchar" MaxLength="200" />
+          <Property Name="AppName" Type="varchar" MaxLength="50" />
+          <Property Name="DateCreated" Type="datetime" />
+          <Property Name="EntityErrors" Type="nvarchar" MaxLength="1000" />
+          <Property Name="ObjectData" Type="nvarchar" MaxLength="2000" />
+        </EntityType>
+        <EntityType Name="IndexedPages">
+          <Key>
+            <PropertyRef Name="PageID" />
+          </Key>
+          <Property Name="PageID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PageName" Type="varchar" MaxLength="250" />
+          <Property Name="PageURL" Type="varchar" MaxLength="400" Nullable="false" />
+          <Property Name="ParentID" Type="int" Nullable="false" />
+          <Property Name="DateCreated" Type="datetime" Nullable="false" />
+          <Property Name="ParentDirectory" Type="varchar" MaxLength="300" />
+          <Property Name="IsIndexed" Type="bit" />
+        </EntityType>
+        <EntityType Name="PageKeywords">
+          <Key>
+            <PropertyRef Name="PageKeywordID" />
+          </Key>
+          <Property Name="PageKeywordID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PageID" Type="int" Nullable="false" />
+          <Property Name="Keyword" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="KeywordCount" Type="int" />
+        </EntityType>
+        <Association Name="FK__PageKeywo__PageI__09A971A2">
+          <End Role="IndexedPages" Type="Self.IndexedPages" Multiplicity="1" />
+          <End Role="PageKeywords" Type="Self.PageKeywords" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="IndexedPages">
+              <PropertyRef Name="PageID" />
+            </Principal>
+            <Dependent Role="PageKeywords">
+              <PropertyRef Name="PageID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="CloudDBModelStoreContainer">
+          <EntitySet Name="AppLog" EntityType="Self.AppLog" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="IndexedPages" EntityType="Self.IndexedPages" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PageKeywords" EntityType="Self.PageKeywords" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__PageKeywo__PageI__09A971A2" Association="Self.FK__PageKeywo__PageI__09A971A2">
+            <End Role="IndexedPages" EntitySet="IndexedPages" />
+            <End Role="PageKeywords" EntitySet="PageKeywords" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="CloudDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="PageKeyword">
+          <Key>
+            <PropertyRef Name="PageKeywordID" />
+          </Key>
+          <Property Name="PageKeywordID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PageID" Type="Int32" Nullable="false" />
+          <Property Name="Keyword" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="KeywordCount" Type="Int32" />
+          <NavigationProperty Name="IndexedPage" Relationship="CloudDBModel.FK__PageKeywo__PageI__09A971A2" FromRole="PageKeyword" ToRole="IndexedPage" />
+        </EntityType>
+        <EntityContainer Name="CloudDBEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="PageKeywords" EntityType="Self.PageKeyword" />
+          <EntitySet Name="IndexedPages" EntityType="CloudDBModel.IndexedPage" />
+          <AssociationSet Name="FK__PageKeywo__PageI__09A971A2" Association="CloudDBModel.FK__PageKeywo__PageI__09A971A2">
+            <End Role="IndexedPage" EntitySet="IndexedPages" />
+            <End Role="PageKeyword" EntitySet="PageKeywords" />
+          </AssociationSet>
+          <EntitySet Name="AppLogs" EntityType="CloudDBModel.AppLog" />
+        </EntityContainer>
+        <EntityType Name="IndexedPage">
+          <Key>
+            <PropertyRef Name="PageID" />
+          </Key>
+          <Property Name="PageID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PageName" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="PageURL" Type="String" Nullable="false" MaxLength="400" FixedLength="false" Unicode="false" />
+          <Property Name="ParentID" Type="Int32" Nullable="false" />
+          <Property Name="DateCreated" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ParentDirectory" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
+          <Property Name="IsIndexed" Type="Boolean" />
+          <NavigationProperty Name="PageKeywords" Relationship="CloudDBModel.FK__PageKeywo__PageI__09A971A2" FromRole="IndexedPage" ToRole="PageKeyword" />
+        </EntityType>
+        <Association Name="FK__PageKeywo__PageI__09A971A2">
+          <End Type="CloudDBModel.IndexedPage" Role="IndexedPage" Multiplicity="1" />
+          <End Type="CloudDBModel.PageKeyword" Role="PageKeyword" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="IndexedPage">
+              <PropertyRef Name="PageID" />
+            </Principal>
+            <Dependent Role="PageKeyword">
+              <PropertyRef Name="PageID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="AppLog">
+          <Key>
+            <PropertyRef Name="MessageID" />
+          </Key>
+          <Property Name="MessageID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="MessageText" Type="String" MaxLength="800" FixedLength="false" Unicode="true" />
+          <Property Name="FullMessage" Type="String" MaxLength="1500" FixedLength="false" Unicode="true" />
+          <Property Name="FunctionName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="PageName" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="AppName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DateCreated" Type="DateTime" Precision="3" />
+          <Property Name="EntityErrors" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="ObjectData" Type="String" MaxLength="2000" FixedLength="false" Unicode="true" />
+        </EntityType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="CloudDBModelStoreContainer" CdmEntityContainer="CloudDBEntities">
+          <EntitySetMapping Name="PageKeywords">
+            <EntityTypeMapping TypeName="CloudDBModel.PageKeyword">
+              <MappingFragment StoreEntitySet="PageKeywords">
+                <ScalarProperty Name="PageKeywordID" ColumnName="PageKeywordID" />
+                <ScalarProperty Name="PageID" ColumnName="PageID" />
+                <ScalarProperty Name="Keyword" ColumnName="Keyword" />
+                <ScalarProperty Name="KeywordCount" ColumnName="KeywordCount" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="IndexedPages">
+            <EntityTypeMapping TypeName="CloudDBModel.IndexedPage">
+              <MappingFragment StoreEntitySet="IndexedPages">
+                <ScalarProperty Name="IsIndexed" ColumnName="IsIndexed" />
+                <ScalarProperty Name="ParentDirectory" ColumnName="ParentDirectory" />
+                <ScalarProperty Name="DateCreated" ColumnName="DateCreated" />
+                <ScalarProperty Name="ParentID" ColumnName="ParentID" />
+                <ScalarProperty Name="PageURL" ColumnName="PageURL" />
+                <ScalarProperty Name="PageName" ColumnName="PageName" />
+                <ScalarProperty Name="PageID" ColumnName="PageID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="AppLogs">
+            <EntityTypeMapping TypeName="CloudDBModel.AppLog">
+              <MappingFragment StoreEntitySet="AppLog">
+                <ScalarProperty Name="ObjectData" ColumnName="ObjectData" />
+                <ScalarProperty Name="EntityErrors" ColumnName="EntityErrors" />
+                <ScalarProperty Name="DateCreated" ColumnName="DateCreated" />
+                <ScalarProperty Name="AppName" ColumnName="AppName" />
+                <ScalarProperty Name="PageName" ColumnName="PageName" />
+                <ScalarProperty Name="FunctionName" ColumnName="FunctionName" />
+                <ScalarProperty Name="FullMessage" ColumnName="FullMessage" />
+                <ScalarProperty Name="MessageText" ColumnName="MessageText" />
+                <ScalarProperty Name="MessageID" ColumnName="MessageID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
