@@ -32,18 +32,22 @@ namespace MiniGoogle.DataServices
 
         public static List<KeywordRanking> GetKeywordRanking(string keyWord)
             {
-            var keywordList = (from pg in DB.IndexedPages
-                              join pgLinks in DB.PageKeywords
-                              on pg.PageID equals pgLinks.PageID
-                               where pgLinks.Keyword.Contains(keyWord)
-                               || pgLinks.Keyword.StartsWith(keyWord)
-                              select new KeywordRanking
-                              {
-                                  PageName = pg.PageName,
-                                  Keyword = pgLinks.Keyword,
-                                  Rank = pgLinks.KeywordCount.Value
-                              }).ToList();
-            return keywordList;
+            var results = (from pg in  DB.IndexedPages
+                           join pgLinks in DB.PageKeywords
+                           on pg.PageID equals pgLinks.PageID
+
+                           where pgLinks.Keyword.Contains(keyWord) || pgLinks.Keyword.StartsWith(keyWord)
+                           || keyWord.Length==0
+                           group new { pg, pgLinks } by pg.PageURL into grup1
+                           select new KeywordRanking
+                            {
+                               PageURL = grup1.FirstOrDefault().pg.PageURL,
+                               Title = grup1.FirstOrDefault().pg.Title,
+                               Rank = grup1.Sum(g => g.pgLinks.KeywordCount.Value)
+                           }).ToList();
+
+
+                       return results;
                 
             
             }
@@ -174,13 +178,13 @@ namespace MiniGoogle.DataServices
                         //get directory for the file, not only the filename.
                         cp.ParentDirectory = Services.SearchLibrary.GetDirectoryForFile(singleLink, pg.PageID);
                         cp.PageURL = GetFullURLFromPartial(cp.PageName, cp.ParentDirectory);
-
+                        cp.Title = ""; // THIS COMES ONLY FORM THE CONTENT;
                         //extra serializable copy of current record for logging/errors
                         currentLink = cp;
 
                         // code to avoid duplicates.
                         
-                        if (!DBSearchResult.PageAlreadySaved(cp.PageURL, cp.PageName))
+                        if (IsValidLink(cp.PageURL) && !DBSearchResult.PageAlreadySaved(cp.PageURL, cp.PageName))
                         {
                             DB.IndexedPages.Add(cp);
                             DB.SaveChanges();
@@ -199,6 +203,31 @@ namespace MiniGoogle.DataServices
                 MessageLogger.LogThis(ex);
             }
 
+        }
+
+        public static bool IsValidLink(string pageURL)
+        {   // if the url is too short 
+            //or is the same as the domain this will throw an error
+            //and it can be skipped.
+
+            try
+            {
+                Uri siteURL = new Uri(pageURL);
+                string domainName = siteURL.GetLeftPart(UriPartial.Authority);
+
+                if (pageURL.StartsWith("#"))
+                {
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageLogger.LogThis(ex);
+                return false;
+
+            }
+
+            return true;
         }
 
         public static List<AppLogVM> GetAppLog()
@@ -265,6 +294,8 @@ namespace MiniGoogle.DataServices
             pg.PageName = Path.GetFileName(searchResults.PageURL);
             pg.PageURL = searchResults.PageURL;
             pg.ParentDirectory = searchResults.ParentDirectory;
+            // the title is coming from another page??
+            pg.Title = searchResults.Title;
             if (!PageAlreadySaved(pg.PageURL, pg.PageName))
             {
                 DB.IndexedPages.Add(pg);
@@ -272,13 +303,21 @@ namespace MiniGoogle.DataServices
                 pageIDAfterInsert = pg.PageID;
             }
             else
-            {   //the page already exists so get the page ID.
+            {   //the page already exists so add a few missing fields page ID.
                 Uri siteURL = new Uri(pg.PageURL);
                 string domainName = siteURL.GetLeftPart(UriPartial.Authority);
 
-                IndexedPage ip = GetPageIndexByName(pg.PageName, domainName);
-                pg.PageID = ip.PageID;
-                pageIDAfterInsert = pg.PageID;
+               IndexedPage ExistingPg = GetPageIndexByName(pg.PageName, domainName);
+                ExistingPg.DateCreated = DateTime.Now;
+                ExistingPg.ParentID = pg.ParentID;
+                // pg.PageName = Path.GetFileName(searchResults.PageURL);
+                // pg.PageURL = searchResults.PageURL;
+                // pg.ParentDirectory = searchResults.ParentDirectory;
+                
+                ExistingPg.Title = searchResults.Title;
+                
+                pageIDAfterInsert = ExistingPg.PageID;
+                DB.SaveChanges();
             }
 
             

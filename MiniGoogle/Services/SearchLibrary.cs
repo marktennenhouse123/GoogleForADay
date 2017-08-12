@@ -26,6 +26,8 @@ namespace MiniGoogle.Services
             }
             else
             { 
+                //the URL might contain only a # or only the domain name.
+
             var myRequest = new Uri(pageURL);
                 string lastPart = myRequest.Segments.Last() + myRequest.Query;
             string parentFolder = pageURL.Replace(lastPart, "");
@@ -43,31 +45,47 @@ namespace MiniGoogle.Services
         public static ContentSearchResult CreateIndexForPage(string pageURL, int parentID)
         {
             //check if this page has been indexed BEFORE getting the content.
-
-            ContentSearchResult searchResult = new ContentSearchResult();
-            searchResult.ParentID = parentID;
-            searchResult.PageName = Path.GetFileName(pageURL);
-            if (! DBSearchResult.PageContentIndexed(pageURL, searchResult.PageName))
+            try
             {
-                searchResult.SearchContent = GetPageContent(pageURL);
-                searchResult.ParentDirectory = GetDirectoryForFile(pageURL, parentID);
-                searchResult.PageURL = pageURL;
-                searchResult.TextContent = GetTextFromHTML(searchResult.SearchContent);
+                ContentSearchResult searchResult = new ContentSearchResult();
+                searchResult.ParentID = parentID;
+                searchResult.PageName = Path.GetFileName(pageURL);
+                if (!DBSearchResult.PageContentIndexed(pageURL, searchResult.PageName))
+                {
+                    searchResult.SearchContent = GetPageContent(pageURL);
+                    searchResult.Title = GetPageTitle(searchResult.SearchContent);
+                    searchResult.ParentDirectory = GetDirectoryForFile(pageURL, parentID);
+                    searchResult.PageURL = pageURL;
+                    searchResult.TextContent = GetTextFromHTML(searchResult.SearchContent);
 
-                //use the full page content to extract the links
-                searchResult.Links = GetLinks(searchResult.SearchContent);
+                    //use the full page content to extract the links
+                    searchResult.Links = GetLinks(searchResult.SearchContent);
 
-                //use ONLY the cleaned text to find the keyword ranking.
-                searchResult.KeyWordRankingList = GetKeywordCounts(searchResult.TextContent);
+                    //use ONLY the cleaned text to find the keyword ranking.
+                    searchResult.KeyWordRankingList = GetKeywordCounts(searchResult.TextContent);
 
-                // save the results to the database for the Links and the Keyword ranking.
-                int newPageID = DBSearchResult.SaveSearchResults(searchResult);
-                searchResult.PageID = newPageID;
+                    // save the results to the database for the Links and the Keyword ranking.
+                    int newPageID = DBSearchResult.SaveSearchResults(searchResult);
+                    searchResult.PageID = newPageID;
+                }
+                return searchResult;
             }
-            return searchResult;
+            catch (Exception ex)
+            {
+                MessageLogger.LogThis(ex);
+                return null;
+            }
+        }
+        private static string GetPageTitle(string content)
+        {
+
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(content);
+            var titleNode = doc.DocumentNode.SelectSingleNode("//title");
+            var titleText = titleNode.InnerText;
+            return titleText;
 
         }
-       
 
         private static string GetTextFromHTML(string docText)
         {

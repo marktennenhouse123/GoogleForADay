@@ -26,7 +26,7 @@ namespace MiniGoogle.Models
         }
     
         public virtual DbSet<PageKeyword> PageKeywords { get; set; }
-        public virtual DbSet<IndexedPage> IndexedPages { get; set; }
         public virtual DbSet<AppLog> AppLogs { get; set; }
+        public virtual DbSet<IndexedPage> IndexedPages { get; set; }
     }
 }

@@ -27,6 +27,7 @@ namespace MiniGoogle.Models
         public System.DateTime DateCreated { get; set; }
         public string ParentDirectory { get; set; }
         public Nullable<bool> IsIndexed { get; set; }
+        public string Title { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<PageKeyword> PageKeywords { get; set; }

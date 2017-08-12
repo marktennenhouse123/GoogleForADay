@@ -6,9 +6,9 @@
     <edmx:Diagrams>
       <Diagram DiagramId="a8f64631117a4384a62355e1b249f17f" Name="Diagram1">
         <EntityTypeShape EntityType="CloudDBModel.PageKeyword" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
-        <EntityTypeShape EntityType="CloudDBModel.IndexedPage" Width="1.5" PointX="0.625" PointY="1.125" />
-        <AssociationConnector Association="CloudDBModel.FK__PageKeywo__PageI__09A971A2" />
         <EntityTypeShape EntityType="CloudDBModel.AppLog" Width="1.5" PointX="3.375" PointY="3.75" />
+        <EntityTypeShape EntityType="CloudDBModel.IndexedPage" Width="1.5" PointX="0.5" PointY="1.875" />
+        <AssociationConnector Association="CloudDBModel.FK__PageKeywo__PageI__09A971A2" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

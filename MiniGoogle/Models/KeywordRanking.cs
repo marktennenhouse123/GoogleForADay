@@ -10,6 +10,8 @@ namespace MiniGoogle.Models
         public string Keyword { get; set; }
         public int Rank { get; set; }
         public string PageName { get; set; }
+        public string PageURL { get; set; }
+        public string Title { get; set; }
         
     }
 }

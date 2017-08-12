@@ -21,7 +21,7 @@
     }
 
     table, th, td {
-        border: 1px solid black;
+        /*border: 1px solid black;*/
     }
 </style>
 <script>
@@ -30,9 +30,10 @@
 
     MainApp.controller("SearchController", function ($scope, $http) {
 
-        $scope.pageName = "http://googleforaday.azurewebsites.net/SamplePage.html";
+        $scope.pageName = "http://localhost:50529/SamplePage.html";
+        //"http://googleforaday.azurewebsites.net/SamplePage.html";
         //"https://www.theverge.com/search?q=piano";
-        //"http://localhost:50529/SamplePage.html";
+        
         $scope.results = "";
         $scope.IndexThePages = function () {
             var url = "/Home/doPageIndexing";
@@ -148,25 +149,21 @@
     <br />
     <button ng-click="doSearch()">Search</button>
     <br />
-    <table>
-        <tr>
-            <td>
+   
                 <table>
-                    <tr>
-                        <td>Page</td>
-                        <td>Keyword</td>
-                        <td>Count</td>
-                    </tr>
+                    
                     <tr ng-repeat="item in results">
                         <td>
-                            {{item.PageName}}
+                            <a target="_blank" href="{{item.PageURL}}">  {{item.Title}}</a>
+                            <br />
+                           Occurrences: {{item.Rank}}
                         </td>
-                        <td>{{item.Keyword}}</td>
-                        <td>{{item.Rank}}</td>
+                        
+                        
                     </tr>
                 </table>
-            </td>
-            <td>
+           
+    
                 <div id="divAppLog">
                     <table>
                         <tr>
@@ -190,9 +187,6 @@
                         </tr>
                     </table>
                 </div>
-            </td>
-        </tr>
-    </table>
-
+          
 
 </div>

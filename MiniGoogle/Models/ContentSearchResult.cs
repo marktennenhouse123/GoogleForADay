@@ -17,6 +17,7 @@ namespace MiniGoogle.Models
         public int ParentID { get; set; }
         public string PageURL { get; set; }
         public int PageID { get; set; }
+        public string Title { get; set; }
         
     }
 }
