@@ -20,7 +20,7 @@ namespace MiniGoogle.Models
         public string FunctionName { get; set; }
         public string PageName { get; set; }
         public string AppName { get; set; }
-        public Nullable<System.DateTime> DateCreated { get; set; }
+        public System.DateTime DateCreated { get; set; }
         public string EntityErrors { get; set; }
         public string ObjectData { get; set; }
     }

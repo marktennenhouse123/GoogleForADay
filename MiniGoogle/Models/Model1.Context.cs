@@ -25,8 +25,9 @@ namespace MiniGoogle.Models
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<PageKeyword> PageKeywords { get; set; }
         public virtual DbSet<AppLog> AppLogs { get; set; }
+        public virtual DbSet<PageKeyWord> PageKeyWords { get; set; }
+        public virtual DbSet<IndexedSite> IndexedSites { get; set; }
         public virtual DbSet<IndexedPage> IndexedPages { get; set; }
     }
 }

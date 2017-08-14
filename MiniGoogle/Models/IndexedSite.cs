@@ -12,26 +12,20 @@ namespace MiniGoogle.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class IndexedPage
+    public partial class IndexedSite
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public IndexedPage()
+        public IndexedSite()
         {
-            this.PageKeyWords = new HashSet<PageKeyWord>();
+            this.IndexedPages = new HashSet<IndexedPage>();
         }
     
-        public int PageID { get; set; }
-        public string PageName { get; set; }
-        public string PageURL { get; set; }
-        public Nullable<int> ParentID { get; set; }
-        public System.DateTime DateCreated { get; set; }
-        public string ParentDirectory { get; set; }
-        public Nullable<bool> IsIndexed { get; set; }
-        public string Title { get; set; }
-        public Nullable<int> IndexedSiteID { get; set; }
+        public int IndexedSiteID { get; set; }
+        public string Domain { get; set; }
+        public string InitialPage { get; set; }
+        public Nullable<System.DateTime> DateCreated { get; set; }
     
-        public virtual IndexedSite IndexedSite { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<PageKeyWord> PageKeyWords { get; set; }
+        public virtual ICollection<IndexedPage> IndexedPages { get; set; }
     }
 }

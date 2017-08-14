@@ -8,7 +8,8 @@ using MiniGoogle.DataServices;
 using System.Web;
 using System.Net;
 using System;
-
+using System.Diagnostics;
+using System.Data.Entity.Validation;
 
 
 namespace MiniGoogle.Services
@@ -42,15 +43,17 @@ namespace MiniGoogle.Services
         /// </summary>
         /// <param name="pageURL"></param>
         /// <returns></returns>
-        public static ContentSearchResult CreateIndexForPage(string pageURL, int parentID)
+        public static ContentSearchResult CreateIndexForPage(string pageURL, int parentID, int siteIndexID)
         {
+            ContentSearchResult searchResult = null;
             //check if this page has been indexed BEFORE getting the content.
             try
             {
-                ContentSearchResult searchResult = new ContentSearchResult();
+                 searchResult = new ContentSearchResult();
                 searchResult.ParentID = parentID;
                 searchResult.PageName = Path.GetFileName(pageURL);
-                if (!DBSearchResult.PageContentIndexed(pageURL, searchResult.PageName))
+                searchResult.IndexedSiteID = siteIndexID;
+                if (!DBSearchResult.IsPageContentIndexed(pageURL, searchResult.PageName))
                 {
                     searchResult.SearchContent = GetPageContent(pageURL);
                     searchResult.Title = GetPageTitle(searchResult.SearchContent);
@@ -70,12 +73,53 @@ namespace MiniGoogle.Services
                 }
                 return searchResult;
             }
+            catch (DbEntityValidationException ex)
+            {
+                string data = Services.SerializeIt.SerializeThis(searchResult);
+                MessageLogger.LogThis(ex, data);
+                return null;
+            }
             catch (Exception ex)
             {
                 MessageLogger.LogThis(ex);
                 return null;
             }
         }
+
+        public static void FixEndlessLoop(List<LinkedPageData> PreviousPageLinks, List<LinkedPageData> currentPageLinks)
+        {
+            if (PreviousPageLinks.Count != currentPageLinks.Count)
+            {
+                if (PreviousPageLinks == currentPageLinks)
+                { //this means we are stuck in an endless loop unable to handle a certain URL.
+
+                    var resultOfComparing = currentPageLinks.Except(PreviousPageLinks).ToList();
+                    if (resultOfComparing.Count == 0)
+                    {
+                        //update these as already indexed or failed.
+                        foreach (var item in currentPageLinks)
+                        {
+
+                            DBSearchResult.UpdateIsIndexedFlag(item.PageID);
+
+                        }
+
+                    }
+                    else
+                    {
+                        PreviousPageLinks = currentPageLinks;
+                    }
+
+                }
+
+            }
+            else if (PreviousPageLinks.Equals(null))
+            {
+                //this is only when the count == 0
+                PreviousPageLinks = currentPageLinks;
+            }
+        }
+
         private static string GetPageTitle(string content)
         {
 
@@ -132,7 +176,7 @@ namespace MiniGoogle.Services
                
                 KeywordRanking singleRanking = new KeywordRanking();
                                 
-                singleRanking.Keyword = grp.Key; //the key is each word
+                singleRanking.Keyword =  grp.Key.Length > 50 ? grp.Key.Substring(0,50): grp.Key; //the key is each word
                 singleRanking.Rank = grp.Count();
                 rankingList.Add(singleRanking);
             }

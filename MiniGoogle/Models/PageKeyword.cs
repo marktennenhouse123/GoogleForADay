@@ -12,10 +12,10 @@ namespace MiniGoogle.Models
     using System;
     using System.Collections.Generic;
     
-    public partial class PageKeyword
+    public partial class PageKeyWord
     {
         public int PageKeywordID { get; set; }
-        public int PageID { get; set; }
+        public Nullable<int> PageID { get; set; }
         public string Keyword { get; set; }
         public Nullable<int> KeywordCount { get; set; }
     

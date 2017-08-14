@@ -5,10 +5,12 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="a8f64631117a4384a62355e1b249f17f" Name="Diagram1">
-        <EntityTypeShape EntityType="CloudDBModel.PageKeyword" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
-        <EntityTypeShape EntityType="CloudDBModel.AppLog" Width="1.5" PointX="3.375" PointY="3.75" />
-        <EntityTypeShape EntityType="CloudDBModel.IndexedPage" Width="1.5" PointX="0.5" PointY="1.875" />
-        <AssociationConnector Association="CloudDBModel.FK__PageKeywo__PageI__09A971A2" />
+        <EntityTypeShape EntityType="CloudDBModel.AppLog" Width="1.5" PointX="1.125" PointY="3.375" />
+        <EntityTypeShape EntityType="CloudDBModel.PageKeyWord" Width="1.5" PointX="7.625" PointY="1.5" />
+        <EntityTypeShape EntityType="CloudDBModel.IndexedSite" Width="1.5" PointX="2.75" PointY="1.125" />
+        <EntityTypeShape EntityType="CloudDBModel.IndexedPage" Width="1.5" PointX="5.25" PointY="0.5" />
+        <AssociationConnector Association="CloudDBModel.FK__IndexedPa__Index__24927208" />
+        <AssociationConnector Association="CloudDBModel.FK__PageKeyWo__PageI__145C0A3F" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

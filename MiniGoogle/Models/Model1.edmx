@@ -15,7 +15,7 @@
           <Property Name="FunctionName" Type="varchar" MaxLength="100" />
           <Property Name="PageName" Type="varchar" MaxLength="200" />
           <Property Name="AppName" Type="varchar" MaxLength="50" />
-          <Property Name="DateCreated" Type="datetime" />
+          <Property Name="DateCreated" Type="datetime" Nullable="false" />
           <Property Name="EntityErrors" Type="nvarchar" MaxLength="1000" />
           <Property Name="ObjectData" Type="nvarchar" MaxLength="2000" />
         </EntityType>
@@ -25,30 +25,52 @@
           </Key>
           <Property Name="PageID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="PageName" Type="varchar" MaxLength="250" />
-          <Property Name="PageURL" Type="varchar" MaxLength="400" Nullable="false" />
-          <Property Name="ParentID" Type="int" Nullable="false" />
+          <Property Name="PageURL" Type="varchar" MaxLength="400" />
+          <Property Name="ParentID" Type="int" />
           <Property Name="DateCreated" Type="datetime" Nullable="false" />
           <Property Name="ParentDirectory" Type="varchar" MaxLength="300" />
           <Property Name="IsIndexed" Type="bit" />
           <Property Name="Title" Type="nvarchar" MaxLength="50" />
+          <Property Name="IndexedSiteID" Type="int" />
         </EntityType>
-        <EntityType Name="PageKeywords">
+        <EntityType Name="IndexedSites">
+          <Key>
+            <PropertyRef Name="IndexedSiteID" />
+          </Key>
+          <Property Name="IndexedSiteID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Domain" Type="varchar" MaxLength="300" />
+          <Property Name="InitialPage" Type="varchar" MaxLength="300" />
+          <Property Name="DateCreated" Type="datetime" />
+        </EntityType>
+        <EntityType Name="PageKeyWords">
           <Key>
             <PropertyRef Name="PageKeywordID" />
           </Key>
           <Property Name="PageKeywordID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="PageID" Type="int" Nullable="false" />
-          <Property Name="Keyword" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="PageID" Type="int" />
+          <Property Name="Keyword" Type="varchar" MaxLength="50" />
           <Property Name="KeywordCount" Type="int" />
         </EntityType>
-        <Association Name="FK__PageKeywo__PageI__09A971A2">
-          <End Role="IndexedPages" Type="Self.IndexedPages" Multiplicity="1" />
-          <End Role="PageKeywords" Type="Self.PageKeywords" Multiplicity="*" />
+        <Association Name="FK__IndexedPa__Index__24927208">
+          <End Role="IndexedSites" Type="Self.IndexedSites" Multiplicity="0..1" />
+          <End Role="IndexedPages" Type="Self.IndexedPages" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="IndexedSites">
+              <PropertyRef Name="IndexedSiteID" />
+            </Principal>
+            <Dependent Role="IndexedPages">
+              <PropertyRef Name="IndexedSiteID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__PageKeyWo__PageI__145C0A3F">
+          <End Role="IndexedPages" Type="Self.IndexedPages" Multiplicity="0..1" />
+          <End Role="PageKeyWords" Type="Self.PageKeyWords" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="IndexedPages">
               <PropertyRef Name="PageID" />
             </Principal>
-            <Dependent Role="PageKeywords">
+            <Dependent Role="PageKeyWords">
               <PropertyRef Name="PageID" />
             </Dependent>
           </ReferentialConstraint>
@@ -56,33 +78,33 @@
         <EntityContainer Name="CloudDBModelStoreContainer">
           <EntitySet Name="AppLog" EntityType="Self.AppLog" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="IndexedPages" EntityType="Self.IndexedPages" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="PageKeywords" EntityType="Self.PageKeywords" Schema="dbo" store:Type="Tables" />
-          <AssociationSet Name="FK__PageKeywo__PageI__09A971A2" Association="Self.FK__PageKeywo__PageI__09A971A2">
+          <EntitySet Name="IndexedSites" EntityType="Self.IndexedSites" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PageKeyWords" EntityType="Self.PageKeyWords" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__IndexedPa__Index__24927208" Association="Self.FK__IndexedPa__Index__24927208">
+            <End Role="IndexedSites" EntitySet="IndexedSites" />
             <End Role="IndexedPages" EntitySet="IndexedPages" />
-            <End Role="PageKeywords" EntitySet="PageKeywords" />
+          </AssociationSet>
+          <AssociationSet Name="FK__PageKeyWo__PageI__145C0A3F" Association="Self.FK__PageKeyWo__PageI__145C0A3F">
+            <End Role="IndexedPages" EntitySet="IndexedPages" />
+            <End Role="PageKeyWords" EntitySet="PageKeyWords" />
           </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="CloudDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="PageKeyword">
-          <Key>
-            <PropertyRef Name="PageKeywordID" />
-          </Key>
-          <Property Name="PageKeywordID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="PageID" Type="Int32" Nullable="false" />
-          <Property Name="Keyword" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="KeywordCount" Type="Int32" />
-          <NavigationProperty Name="IndexedPage" Relationship="CloudDBModel.FK__PageKeywo__PageI__09A971A2" FromRole="PageKeyword" ToRole="IndexedPage" />
-        </EntityType>
         <EntityContainer Name="CloudDBEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="PageKeywords" EntityType="Self.PageKeyword" />
           <EntitySet Name="AppLogs" EntityType="CloudDBModel.AppLog" />
+          <EntitySet Name="PageKeyWords" EntityType="CloudDBModel.PageKeyWord" />
+          <EntitySet Name="IndexedSites" EntityType="CloudDBModel.IndexedSite" />
           <EntitySet Name="IndexedPages" EntityType="CloudDBModel.IndexedPage" />
-          <AssociationSet Name="FK__PageKeywo__PageI__09A971A2" Association="CloudDBModel.FK__PageKeywo__PageI__09A971A2">
+          <AssociationSet Name="FK__IndexedPa__Index__24927208" Association="CloudDBModel.FK__IndexedPa__Index__24927208">
+            <End Role="IndexedSite" EntitySet="IndexedSites" />
             <End Role="IndexedPage" EntitySet="IndexedPages" />
-            <End Role="PageKeyword" EntitySet="PageKeywords" />
+          </AssociationSet>
+          <AssociationSet Name="FK__PageKeyWo__PageI__145C0A3F" Association="CloudDBModel.FK__PageKeyWo__PageI__145C0A3F">
+            <End Role="IndexedPage" EntitySet="IndexedPages" />
+            <End Role="PageKeyWord" EntitySet="PageKeyWords" />
           </AssociationSet>
         </EntityContainer>
         <EntityType Name="AppLog">
@@ -95,9 +117,29 @@
           <Property Name="FunctionName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="PageName" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
           <Property Name="AppName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DateCreated" Type="DateTime" Precision="3" />
+          <Property Name="DateCreated" Type="DateTime" Precision="3" Nullable="false" />
           <Property Name="EntityErrors" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
           <Property Name="ObjectData" Type="String" MaxLength="2000" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="PageKeyWord">
+          <Key>
+            <PropertyRef Name="PageKeywordID" />
+          </Key>
+          <Property Name="PageKeywordID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PageID" Type="Int32" />
+          <Property Name="Keyword" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="KeywordCount" Type="Int32" />
+          <NavigationProperty Name="IndexedPage" Relationship="CloudDBModel.FK__PageKeyWo__PageI__145C0A3F" FromRole="PageKeyWord" ToRole="IndexedPage" />
+        </EntityType>
+        <EntityType Name="IndexedSite">
+          <Key>
+            <PropertyRef Name="IndexedSiteID" />
+          </Key>
+          <Property Name="IndexedSiteID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Domain" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
+          <Property Name="InitialPage" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
+          <Property Name="DateCreated" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="IndexedPages" Relationship="CloudDBModel.FK__IndexedPa__Index__24927208" FromRole="IndexedSite" ToRole="IndexedPage" />
         </EntityType>
         <EntityType Name="IndexedPage">
           <Key>
@@ -105,22 +147,36 @@
           </Key>
           <Property Name="PageID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="PageName" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
-          <Property Name="PageURL" Type="String" Nullable="false" MaxLength="400" FixedLength="false" Unicode="false" />
-          <Property Name="ParentID" Type="Int32" Nullable="false" />
+          <Property Name="PageURL" Type="String" MaxLength="400" FixedLength="false" Unicode="false" />
+          <Property Name="ParentID" Type="Int32" />
           <Property Name="DateCreated" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="ParentDirectory" Type="String" MaxLength="300" FixedLength="false" Unicode="false" />
           <Property Name="IsIndexed" Type="Boolean" />
           <Property Name="Title" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
-          <NavigationProperty Name="PageKeywords" Relationship="CloudDBModel.FK__PageKeywo__PageI__09A971A2" FromRole="IndexedPage" ToRole="PageKeyword" />
+          <Property Name="IndexedSiteID" Type="Int32" />
+          <NavigationProperty Name="IndexedSite" Relationship="CloudDBModel.FK__IndexedPa__Index__24927208" FromRole="IndexedPage" ToRole="IndexedSite" />
+          <NavigationProperty Name="PageKeyWords" Relationship="CloudDBModel.FK__PageKeyWo__PageI__145C0A3F" FromRole="IndexedPage" ToRole="PageKeyWord" />
         </EntityType>
-        <Association Name="FK__PageKeywo__PageI__09A971A2">
-          <End Type="CloudDBModel.IndexedPage" Role="IndexedPage" Multiplicity="1" />
-          <End Type="CloudDBModel.PageKeyword" Role="PageKeyword" Multiplicity="*" />
+        <Association Name="FK__IndexedPa__Index__24927208">
+          <End Type="CloudDBModel.IndexedSite" Role="IndexedSite" Multiplicity="0..1" />
+          <End Type="CloudDBModel.IndexedPage" Role="IndexedPage" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="IndexedSite">
+              <PropertyRef Name="IndexedSiteID" />
+            </Principal>
+            <Dependent Role="IndexedPage">
+              <PropertyRef Name="IndexedSiteID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__PageKeyWo__PageI__145C0A3F">
+          <End Type="CloudDBModel.IndexedPage" Role="IndexedPage" Multiplicity="0..1" />
+          <End Type="CloudDBModel.PageKeyWord" Role="PageKeyWord" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="IndexedPage">
               <PropertyRef Name="PageID" />
             </Principal>
-            <Dependent Role="PageKeyword">
+            <Dependent Role="PageKeyWord">
               <PropertyRef Name="PageID" />
             </Dependent>
           </ReferentialConstraint>
@@ -131,16 +187,6 @@
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="CloudDBModelStoreContainer" CdmEntityContainer="CloudDBEntities">
-          <EntitySetMapping Name="PageKeywords">
-            <EntityTypeMapping TypeName="CloudDBModel.PageKeyword">
-              <MappingFragment StoreEntitySet="PageKeywords">
-                <ScalarProperty Name="PageKeywordID" ColumnName="PageKeywordID" />
-                <ScalarProperty Name="PageID" ColumnName="PageID" />
-                <ScalarProperty Name="Keyword" ColumnName="Keyword" />
-                <ScalarProperty Name="KeywordCount" ColumnName="KeywordCount" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="AppLogs">
             <EntityTypeMapping TypeName="CloudDBModel.AppLog">
               <MappingFragment StoreEntitySet="AppLog">
@@ -156,9 +202,30 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="PageKeyWords">
+            <EntityTypeMapping TypeName="CloudDBModel.PageKeyWord">
+              <MappingFragment StoreEntitySet="PageKeyWords">
+                <ScalarProperty Name="KeywordCount" ColumnName="KeywordCount" />
+                <ScalarProperty Name="Keyword" ColumnName="Keyword" />
+                <ScalarProperty Name="PageID" ColumnName="PageID" />
+                <ScalarProperty Name="PageKeywordID" ColumnName="PageKeywordID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="IndexedSites">
+            <EntityTypeMapping TypeName="CloudDBModel.IndexedSite">
+              <MappingFragment StoreEntitySet="IndexedSites">
+                <ScalarProperty Name="DateCreated" ColumnName="DateCreated" />
+                <ScalarProperty Name="InitialPage" ColumnName="InitialPage" />
+                <ScalarProperty Name="Domain" ColumnName="Domain" />
+                <ScalarProperty Name="IndexedSiteID" ColumnName="IndexedSiteID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="IndexedPages">
             <EntityTypeMapping TypeName="CloudDBModel.IndexedPage">
               <MappingFragment StoreEntitySet="IndexedPages">
+                <ScalarProperty Name="IndexedSiteID" ColumnName="IndexedSiteID" />
                 <ScalarProperty Name="Title" ColumnName="Title" />
                 <ScalarProperty Name="IsIndexed" ColumnName="IsIndexed" />
                 <ScalarProperty Name="ParentDirectory" ColumnName="ParentDirectory" />

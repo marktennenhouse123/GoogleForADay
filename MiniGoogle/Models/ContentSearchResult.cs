@@ -18,6 +18,7 @@ namespace MiniGoogle.Models
         public string PageURL { get; set; }
         public int PageID { get; set; }
         public string Title { get; set; }
+        public int IndexedSiteID { get; set; }
         
     }
 }

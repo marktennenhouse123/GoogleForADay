@@ -23,27 +23,38 @@
     table, th, td {
         /*border: 1px solid black;*/
     }
+    .IndexResults {
+    font:bold;
+    font-size:20px;
+    }
 </style>
 <script>
     var MainApp = angular.module("MainApp", []);
 
 
     MainApp.controller("SearchController", function ($scope, $http) {
+        $scope.pageCount = 0;
+        $scope.keywordCount = 0;
+        
+
 
         $scope.pageName = "http://localhost:50529/SamplePage.html";
         //"http://googleforaday.azurewebsites.net/SamplePage.html";
         //"https://www.theverge.com/search?q=piano";
         
         $scope.results = "";
+
         $scope.IndexThePages = function () {
-            var url = "/Home/doPageIndexing";
-            var postData = { pageName: $scope.pageName, pageID: 0 };
+            var url = "/Home/startPageIndexProcess";
+            var postData = { pageName: $scope.pageName };
             $scope.ShowLoadingImage(true);
             $http.post(url, postData)
             .then(function (data) {
 
                 $scope.ShowLoadingImage(false);
-                alert(data.data);
+                $scope.pageCount = data.data.PagesIndexed;
+                $scope.keywordCount = data.data.KeywordsIndexed;
+              //  alert(data.data);
                 console.log(data);
             });
         };
@@ -76,6 +87,15 @@
             }
 
         }
+        $scope.HideCoderTools = function () {
+            $("#divCoderTools").hide();
+        }
+
+        $scope.ShowCoderTools = function ()
+        {
+            $("#divCoderTools").show();
+        }
+
 
         $scope.HideAppLog = function () {
             $("#divAppLog").hide();
@@ -121,6 +141,8 @@
             })
         };
 
+        $scope.HideAppLog();
+        $scope.HideCoderTools();
     });
 
 
@@ -135,11 +157,14 @@
     Index this Page: &nbsp;<input type="text" class="inputStyle" ng-model="pageName" /> <br />
     <br />
     <button ng-click="IndexThePages()">Run Indexing</button>  &nbsp;&nbsp;
-    <button ng-click="ClearAll()">Reset</button> &nbsp;&nbsp;
-    <button ng-click="ClearAppLog()">Clear App Log</button>
-    <button ng-click="ShowAppLog()">Show App Log</button>
-    <button ng-click="HideAppLog()">Hide App Log</button>
-    <a href="~/SamplePage.html">Sample page 1</a> &nbsp; &nbsp; <a href="~/SamplePage2.html">Sample page 2</a> &nbsp;&nbsp;<a href="~/SamplePage3.html">Sample page 3</a>
+    <button ng-click="ClearAll()">CLEAR ALL</button> &nbsp;&nbsp;
+    <button ng-click="ShowCoderTools()" >Show coder tools</button><button ng-click="HideCoderTools()">Hide Tools</button>
+    <div id="divCoderTools">
+        <button ng-click="ClearAppLog()">Clear App Log</button>
+        <button ng-click="ShowAppLog()">Show App Log</button>
+        <button ng-click="HideAppLog()">Hide App Log</button>
+        <a href="~/SamplePage.html">Sample page 1</a> &nbsp; &nbsp; <a href="~/SamplePage2.html">Sample page 2</a> &nbsp;&nbsp;<a href="~/SamplePage3.html">Sample page 3</a>
+    </div>
     <br />
     <div id="loadingImage" class="modal loadingImage">
         <p><img src="~/Content/LoadingImage.gif" /> Please Wait</p>
@@ -149,7 +174,9 @@
     <br />
     <button ng-click="doSearch()">Search</button>
     <br />
-   
+   <div class="IndexResults">
+       Indexed {{pageCount}} Pages and {{keywordCount}} Words
+   </div>
                 <table>
                     
                     <tr ng-repeat="item in results">
