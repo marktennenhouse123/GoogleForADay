@@ -23,9 +23,14 @@
     table, th, td {
         /*border: 1px solid black;*/
     }
+
     .IndexResults {
-    font:bold;
-    font-size:20px;
+        font: bold;
+        font-size: 20px;
+    }
+    .ErrorMessage {
+        font: bold;
+        font-size: 15px;
     }
 </style>
 <script>
@@ -35,26 +40,38 @@
     MainApp.controller("SearchController", function ($scope, $http) {
         $scope.pageCount = 0;
         $scope.keywordCount = 0;
+        $("#btnShowHideTools").html("Show Coder Tools");
         
 
 
-        $scope.pageName = "http://localhost:50529/SamplePage.html";
-        //"http://googleforaday.azurewebsites.net/SamplePage.html";
+
+        $scope.pageName = "http://googleforaday.azurewebsites.net/SamplePage.html";
+        //"http://localhost:50529/SamplePage.html";
+
         //"https://www.theverge.com/search?q=piano";
-        
+
         $scope.results = "";
 
         $scope.IndexThePages = function () {
             var url = "/Home/startPageIndexProcess";
             var postData = { pageName: $scope.pageName };
             $scope.ShowLoadingImage(true);
+            $("#IndexingError").hide();
+
             $http.post(url, postData)
             .then(function (data) {
+                
 
                 $scope.ShowLoadingImage(false);
-                $scope.pageCount = data.data.PagesIndexed;
-                $scope.keywordCount = data.data.KeywordsIndexed;
-              //  alert(data.data);
+                if (data.length > 0 ) {
+                    $scope.pageCount = data.data.PagesIndexed;
+                    $scope.keywordCount = data.data.KeywordsIndexed;
+                    $("#IndexedResults").show();
+                }
+                else {
+                    $("#IndexingError").show();
+                }
+                //  alert(data.data);
                 console.log(data);
             });
         };
@@ -67,6 +84,8 @@
         };
 
         $scope.doSearch = function () {
+            $("#IndexedResults").hide();
+            $("#IndexingError").hide();
             var url = "/home/RunSearch";
             var postData = { keyword: $scope.keyword };
             $scope.ShowLoadingImage(true);
@@ -87,44 +106,74 @@
             }
 
         }
-        $scope.HideCoderTools = function () {
-            $("#divCoderTools").hide();
-        }
-
-        $scope.ShowCoderTools = function ()
-        {
-            $("#divCoderTools").show();
-        }
 
 
-        $scope.HideAppLog = function () {
-            $("#divAppLog").hide();
+        $scope.ShowCoderTools = function () {
+            var tools = $("#divCoderTools");
+            var isHidden = $('#divCoderTools').is(':hidden');
+            if (isHidden == true) {
+                tools.show()
+                $("#btnShowHideTools").html("Hide Coder Tools");
+                
+            }
+            else {
+                tools.hide();
+                
+                $("#btnShowHideTools").html("Show Coder Tools");
+
+            }
+
+
         }
+
+
+        
 
         $scope.ShowAppLog = function () {
 
-            var url = "/Home/GetAppLog";
+
+            var appLog = $("#divAppLog");
+            var isHidden = $('#divAppLog').is(':hidden');
+            if (isHidden == true) {
+                appLog.show()
+                var url = "/Home/GetAppLog";
+
+                $scope.ShowLoadingImage(true);
+                $http.post(url, '')
+            .then(function (data) {
+                $scope.logResults = data.data;
+                $scope.ShowLoadingImage(false);
+
+            })
+
+            }
+            else {
+                appLog.hide();
 
 
-            $scope.ShowLoadingImage(true);
-            $http.post(url, '')
-        .then(function (data) {
-            $scope.logResults = data.data;
-            $scope.ShowLoadingImage(false);
-            $("#divAppLog").show();
-        })
+            }
         }
 
         $scope.ClearAppLog = function () {
             var url = "/Home/ClearAppLog";
             $scope.ShowLoadingImage(true);
+            $("#IndexingError").hide();
             $http.post(url, '')
             .then(function (data) {
                 $scope.ShowLoadingImage(false);
                 alert(data.data);
                 $scope.logResults = "";
+                
 
             });
+        }
+
+        $scope.RunSetup = function ()
+        {
+            $scope.ShowAppLog();
+            $scope.ShowCoderTools();
+            $("#IndexedResults").hide();
+            $("#IndexingError").hide();
         }
 
         $scope.ClearAll = function () {
@@ -141,8 +190,8 @@
             })
         };
 
-        $scope.HideAppLog();
-        $scope.HideCoderTools();
+        $scope.RunSetup();
+
     });
 
 
@@ -154,15 +203,17 @@
 <div ng-app="MainApp" ng-controller="SearchController">
     <br />
     <br />
-    Index this Page: &nbsp;<input type="text" class="inputStyle" ng-model="pageName" /> <br />
+    Index this Site: &nbsp;<input type="text" class="inputStyle" ng-model="pageName" /> <br />
     <br />
-    <button ng-click="IndexThePages()">Run Indexing</button>  &nbsp;&nbsp;
+    <button ng-click="IndexThePages()">Run Indexer</button>  &nbsp;&nbsp;
     <button ng-click="ClearAll()">CLEAR ALL</button> &nbsp;&nbsp;
-    <button ng-click="ShowCoderTools()" >Show coder tools</button><button ng-click="HideCoderTools()">Hide Tools</button>
+    <button id="btnShowHideTools" ng-click="ShowCoderTools()"></button>
+    
     <div id="divCoderTools">
+        <br />
         <button ng-click="ClearAppLog()">Clear App Log</button>
-        <button ng-click="ShowAppLog()">Show App Log</button>
-        <button ng-click="HideAppLog()">Hide App Log</button>
+        <button ng-click="ShowAppLog()">Show/Hide App Log</button>
+        
         <a href="~/SamplePage.html">Sample page 1</a> &nbsp; &nbsp; <a href="~/SamplePage2.html">Sample page 2</a> &nbsp;&nbsp;<a href="~/SamplePage3.html">Sample page 3</a>
     </div>
     <br />
@@ -174,46 +225,48 @@
     <br />
     <button ng-click="doSearch()">Search</button>
     <br />
-   <div class="IndexResults">
-       Indexed {{pageCount}} Pages and {{keywordCount}} Words
-   </div>
-                <table>
-                    
-                    <tr ng-repeat="item in results">
-                        <td>
-                            <a target="_blank" href="{{item.PageURL}}">  {{item.Title}}</a>
-                            <br />
-                           Occurrences: {{item.Rank}}
-                        </td>
-                        
-                        
-                    </tr>
-                </table>
-           
-    
-                <div id="divAppLog">
-                    <table>
-                        <tr>
-                            <td>Function</td>
-                            <td>Page</td>
-                            <td>FullText</td>
-                            <td>ErrorText</td>
-                            <td>DateCreated</td>
+    <div id="IndexedResults" class="IndexResults">
+        Indexed {{pageCount}} Pages and {{keywordCount}} Words
+    </div>
+    <div id="IndexingError" class="ErrorMessage">Completed with errors; Please check the app log in Coder Tools.</div>
+    <table>
 
-                        </tr>
-                        <tr ng-repeat="item in logResults">
-                            <td>
-                                {{item.FunctionName}}
-                            </td>
-                            <td>{{item.PageName}}</td>
-                            <td>{{item.Page}}</td>
-                            <td>{{item.FullMessage}}</td>
-                            <td>{{item.MessageText}}</td>
+        <tr ng-repeat="item in results">
+            <td>
+                <a target="_blank" href="{{item.PageURL}}">  {{item.Title}}</a>
+                <br />
+                Occurrences: {{item.Rank}}
+            </td>
 
 
-                        </tr>
-                    </table>
-                </div>
+        </tr>
+    </table>
+
+
+    <div id="divAppLog">
+        <table>
+            <tr>
+                <td>Function</td>
+                <td>EntityErrors</td>
+                <td>Page</td>
+                <td>Stack Trace</td>
+                <td>DateCreated</td>
+
+            </tr>
           
+            <tr ng-repeat="item in logResults">
+                <td>
+                    {{item.FunctionName}}
+                </td>
+                <td>{{item.EntityErrors}}</td>
+                <td>{{item.PageName}}</td>
+                <td>{{item.FullMessage}}</td>
+                <td>{{item.DateCreated}}</td>
+
+
+            </tr>
+        </table>
+    </div>
+
 
 </div>

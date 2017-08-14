@@ -56,7 +56,7 @@ namespace MiniGoogle.Services
                 if (!DBSearchResult.IsPageContentIndexed(pageURL, searchResult.PageName))
                 {
                     searchResult.SearchContent = GetPageContent(pageURL);
-                    searchResult.Title = GetPageTitle(searchResult.SearchContent);
+                    searchResult.Title = GetPageTitle(searchResult.SearchContent, searchResult.PageName);
                     searchResult.ParentDirectory = GetDirectoryForFile(pageURL, parentID);
                     searchResult.PageURL = pageURL;
                     searchResult.TextContent = GetTextFromHTML(searchResult.SearchContent);
@@ -120,25 +120,44 @@ namespace MiniGoogle.Services
             }
         }
 
-        private static string GetPageTitle(string content)
+        private static string GetPageTitle(string content, string pageName)
         {
 
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(content);
             var titleNode = doc.DocumentNode.SelectSingleNode("//title");
-            var titleText = titleNode.InnerText;
-            return titleText;
+            if (titleNode != null)
+            {
+                var titleText = titleNode.InnerText;
+                return titleText;
+            }
+            else
+            { return pageName;
+            }
 
         }
 
         private static string GetTextFromHTML(string docText)
-        {
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(docText);
-            var bodyNode = doc.DocumentNode.SelectSingleNode("//body");
-            var nodeText = bodyNode.InnerText;
-            return nodeText;
-
+        { try
+            {
+                HtmlDocument doc = new HtmlDocument();
+                doc.LoadHtml(docText);
+                var bodyNode = doc.DocumentNode.SelectSingleNode("//body");
+                if (bodyNode != null)
+                {
+                    var nodeText = bodyNode.InnerText;
+                    return nodeText;
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageLogger.LogThis(ex);
+                return string.Empty;
+            }
         }
       
 

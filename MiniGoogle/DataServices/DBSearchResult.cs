@@ -79,24 +79,36 @@ namespace MiniGoogle.DataServices
         ///group the pages by pageURL and sum up the keyword counts
         public static List<KeywordRanking> GetKeywordRanking(string keyWord)
             {
-            var results = (from pg in  DB.IndexedPages
-                           join pgLinks in DB.PageKeyWords
-                           on pg.PageID equals pgLinks.PageID
+            try
+            {
+                var results = (from pg in DB.IndexedPages
+                               join pgLinks in DB.PageKeyWords
+                               on pg.PageID equals pgLinks.PageID
 
-                           where pgLinks.Keyword.Contains(keyWord) || pgLinks.Keyword.StartsWith(keyWord)
-                           || null == keyWord 
-                           group new { pg, pgLinks } by pg.PageURL into grup1
-                           select new KeywordRanking
-                            {
-                               PageURL = grup1.FirstOrDefault().pg.PageURL,
-                               Title = grup1.FirstOrDefault().pg.Title,
-                               Rank = grup1.Sum(g => g.pgLinks.KeywordCount.Value)
-                           }).ToList();
+                               where pgLinks.Keyword.Contains(keyWord) || pgLinks.Keyword.StartsWith(keyWord)
+                               || null == keyWord
+                               group new { pg, pgLinks } by pg.PageURL into grup1
+                               select new KeywordRanking
+                               {
+                                   PageURL = grup1.FirstOrDefault().pg.PageURL,
+                                   Title = grup1.FirstOrDefault().pg.Title,
+                                   Rank = grup1.Sum(g => g.pgLinks.KeywordCount.Value)
+                               }).ToList();
 
 
-                       return results;
-                
-            
+                return results;
+            }
+            catch (DbEntityValidationException ex)
+            {
+                MessageLogger.LogThis(ex);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                MessageLogger.LogThis(ex);
+                return null;
+
+            }
             }
 
 
