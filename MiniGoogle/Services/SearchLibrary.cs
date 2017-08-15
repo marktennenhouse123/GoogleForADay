@@ -30,14 +30,30 @@ namespace MiniGoogle.Services
                 return pg.PageDirectory;
             }
             else
-            { 
+            {
                 //the URL might contain only a # or only the domain name.
+                //handle the case where it is a root folder.
+                Regex domainMatch;
+                string protocolPart = @"^(http(s)?(:\/\/))?(www\.)?";
+                string domainPart = @"[a-zA-Z0-9-_\.]+";
+                string paramsPart = @"/([-a-zA-Z0-9:%_\+.~#?&//=]*)/";
+                string fullURLMatch = string.Join("", protocolPart, domainPart, paramsPart);
+                domainMatch = new Regex(fullURLMatch);
+               string leftOver = domainMatch.Replace(fixedURL, "");
+                if (leftOver.Length < 2)
+                {
+                    return fixedURL;
+                }
+                else
+                {
 
-            var myRequest = new Uri(fixedURL);
-                string lastPart = myRequest.Segments.Last() + myRequest.Query;
-            string parentFolder = fixedURL.Replace(lastPart, "");
-          
-                return parentFolder;
+                    var myRequest = new Uri(fixedURL);
+                    string lastPart = myRequest.Segments.Last() + myRequest.Query;
+
+                    string parentFolder = fixedURL.Replace(lastPart, "");
+
+                    return parentFolder;
+                }
             }
         }
 

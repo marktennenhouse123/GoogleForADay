@@ -2,6 +2,38 @@
     ViewBag.Title = "Google JR";
 }
 <style>
+    .btn3dOLD {
+    position:relative;
+    border:0;
+    border-radius:3px;
+    margin:15px 10px 0 0;
+    transition:all .09s linear;
+    box-shadow:0 0 0 1px transparent inset, 0 0 0 2px rgba(255,255,255,0.15) inset, 6px 6px 0 0 #ccc, 6px 6px 0 1px rgba(0,0,0,0.2), 6px 6px 3px 0px rgba(0,0,0,0.3);
+    outline:medium none;
+    -moz-outline-style:none;
+}
+
+    .btn3d {
+        position: relative;
+        border: 0;
+        border-radius: 3px;
+        margin: 15px 10px 0 0;
+        transition: all .09s linear;
+        box-shadow: 0 0 0 1px transparent inset, 0 0 0 2px rgba(255,255,255,0.15) inset, 6px 6px 0 0 black, 6px 6px 0 1px black, 6px 6px 3px 0px black;
+        outline: medium none;
+        -moz-outline-style: none;
+    }
+
+.btn3d:active {
+    top:7px;
+}
+.btn3d:focus {
+    outline:medium none;
+    -moz-outline-style:none;
+}
+.btn3d.btn-default {
+    background-color:#f5f5f5;
+}
     .loadingImage {
         position: fixed;
         z-index: 1000;
@@ -11,13 +43,23 @@
         width: 100%;
     }
 
+    .RowSpacer {
+        min-height: 20px;
+        background-color: #ffffff;
+        border: solid,1px,black;
+    }
 
     table {
         border-collapse: collapse;
     }
 
+   
     .inputStyle {
-        width: 650px;
+    width: 90%;
+    height: 35px;
+    font-size:20px;
+    border-style: solid;
+    border-width: 2px;
     }
 
     table, th, td {
@@ -28,6 +70,7 @@
         font: bold;
         font-size: 20px;
     }
+
     .ErrorMessage {
         font: bold;
         font-size: 20px;
@@ -41,15 +84,15 @@
         $scope.pageCount = 0;
         $scope.keywordCount = 0;
         $("#btnShowHideTools").html("Show Coder Tools");
-        
 
 
-        //test page 
+
+        //test page
         $scope.pageName = "https://investorjunkie.com/41686/wealthfront-promotion/";
-            //"http://googleforaday.azurewebsites.net/SamplePage.html";
-            //"http://localhost:50529/SamplePage.html";
-            
-        
+        //"http://googleforaday.azurewebsites.net/SamplePage.html";
+        //"http://localhost:50529/SamplePage.html";
+
+
 
         //"https://www.theverge.com/search?q=piano";
         //main variable for search results
@@ -64,10 +107,10 @@
 
             $http.post(url, postData)
             .then(function (data) {
-                
+
 
                 $scope.ShowLoadingImage(false);
-                if (data.data != undefined ) {    //if totals fail to come back show the error message.
+                if (data.data != undefined) {    //if totals fail to come back show the error message.
                     $scope.pageCount = data.data.PagesIndexed;
                     $scope.keywordCount = data.data.KeywordsIndexed;
                     $("#IndexedResults").show();
@@ -121,24 +164,36 @@
             var isHidden = $('#divCoderTools').is(':hidden');
             if (isHidden == true) {
                 tools.show()
-                $("#btnShowHideTools").html("Hide Coder Tools");
-                
+            
             }
             else {
                 tools.hide();
-                
-                $("#btnShowHideTools").html("Show Coder Tools");
 
             }
 
 
         }
 
+        $scope.ShowSection = function (someID)
+        { //1 is the index section
+            //2 is the Search section
+            if (someID == 1)
+            {
+                $("#divIndex").show();
+                $("#divSearch").hide();
+            }
+            else if (someID == 2)
+            {
+                $("#divSearch").show();
+                $("#divIndex").hide();
+            }
 
-        
+        }
+
+
         //show and hide the applog fields.
         $scope.ShowAppLog = function () {
-            
+
             var appLog = $("#divAppLog");
             var isHidden = $('#divAppLog').is(':hidden');
             if (isHidden == true) {
@@ -171,18 +226,20 @@
                 $scope.ShowLoadingImage(false);
                 alert(data.data);
                 $scope.logResults = "";
-                
+
 
             });
         }
 
+
+
         //this is the load function for the page.
-        $scope.RunSetup = function ()
-        {
+        $scope.RunSetup = function () {
             $scope.ShowAppLog();
             $scope.ShowCoderTools();
             $("#IndexedResults").hide();
             $("#IndexingError").hide();
+            $scope.ShowSection(1);
         }
 
         //this clears all of the indexed values in all tables.
@@ -204,73 +261,104 @@
 
     });
 
-
-
-
-
 </script>
 
 <div ng-app="MainApp" ng-controller="SearchController">
-    <br />
-    <br />
-    Index this Site: &nbsp;<input type="text" class="inputStyle" ng-model="pageName" /> <br />
-    <br />
-    <button ng-click="IndexThePages()">Run Indexer</button>  &nbsp;&nbsp;
-    <button ng-click="ClearAll()">CLEAR ALL</button> &nbsp;&nbsp;
-    <button id="btnShowHideTools" ng-click="ShowCoderTools()"></button>
-    
-    <div id="divCoderTools">
+   
+    <div class="row">
+            <div class="col-md-4 IndexResults"></div>
+            <div class="col-md-1 IndexResults">
+                <a href="" ng-click="ShowSection(2)">Search</a>
+            </div>
+            <div class="col-md-1 IndexResults " style="margin-left:25px">|</div>
+            <div class="col-md-1 IndexResults">
+               
+                <a href="" ng-click="ShowSection(1)">Index</a>
+            </div>
+
+            <div class="col-md-1 IndexResults">|
+            </div>
+        <div class="col-md-3">
+
+            <a href="" class="IndexResults" ng-click="ShowCoderTools()">Debug</a>
+
+            <div id="divCoderTools">
+                
+                <button ng-click="ClearAppLog()">Clear App Log</button>
+                <button ng-click="ShowAppLog()">Show/Hide App Log</button>
+
+               
+            </div>
+        </div>
+     </div>
+    <div class="row">
+        <div class="col-md-12 RowSpacer"><br /><br /><br /></div>
+    </div>
+    <div id="divIndex">
+        <div class="row">
+            <input type="text" class="inputStyle" ng-model="pageName" />
+        </div>
+        <div class="row">
+            <div class="col-md-12 RowSpacer"><br /><br /></div>
+
+        </div>
+        <div class="row">
+            <div class="col-md-4 "></div>
+            <div class="col-md-2 IndexResults"><button class="btn btn-lg btn3d btn-info" ng-click="IndexThePages()"> INDEX</button></div>
+            <div class="col-md-2 IndexResults"><button class="btn btn-lg btn3d btn-danger" ng-click="ClearAll()">CLEAR</button></div>
+            <div class="col-md-2"></div>
+        </div>
+    </div>
+
+    <div id="divSearch">
+
+
+
         <br />
-        <button ng-click="ClearAppLog()">Clear App Log</button>
-        <button ng-click="ShowAppLog()">Show/Hide App Log</button>
-        
-        <a href="~/SamplePage.html">Sample page 1</a> &nbsp; &nbsp; <a href="~/SamplePage2.html">Sample page 2</a> &nbsp;&nbsp;<a href="~/SamplePage3.html">Sample page 3</a>
+        <div id="loadingImage" class="modal loadingImage">
+            <p><img src="~/Content/LoadingImage.gif" /> Please Wait</p>
+        </div>
+        <br />
+        Search &nbsp;<input type="text" class="inputStyle" ng-model="keyword" /> <br />
+        <br />
+        <button ng-click="doSearch()">Search</button>
+        <br />
+        <div id="IndexedResults" class="IndexResults">
+            Indexed {{pageCount}} Pages and {{keywordCount}} Words
+        </div>
+        <div id="IndexingError" class="ErrorMessage">Completed with errors; Please check the app log in Coder Tools.</div>
+        <table>
+
+            <tr ng-repeat="item in results">
+                <td>
+                    <a target="_blank" href="{{item.PageURL}}">  {{item.Title}}</a>
+                    <br />
+                    Occurrences: {{item.Rank}}
+                </td>
+
+
+            </tr>
+        </table>
+
     </div>
-    <br />
-    <div id="loadingImage" class="modal loadingImage">
-        <p><img src="~/Content/LoadingImage.gif" /> Please Wait</p>
-    </div>
-    <br />
-    Search Indexed Pages: &nbsp;<input type="text" class="inputStyle" ng-model="keyword" /> <br />
-    <br />
-    <button ng-click="doSearch()">Search</button>
-    <br />
-    <div id="IndexedResults" class="IndexResults">
-        Indexed {{pageCount}} Pages and {{keywordCount}} Words
-    </div>
-    <div id="IndexingError" class="ErrorMessage">Completed with errors; Please check the app log in Coder Tools.</div>
-    <table>
-
-        <tr ng-repeat="item in results">
-            <td>
-                <a target="_blank" href="{{item.PageURL}}">  {{item.Title}}</a>
-                <br />
-                Occurrences: {{item.Rank}}
-            </td>
-
-
-        </tr>
-    </table>
-
-
     <div id="divAppLog">
         <table>
             <tr>
                 <td>Function</td>
                 <td>Message</td>
-                
+
                 <td>Stack Trace</td>
                 <td>DateCreated</td>
                 <td>Page</td>
 
             </tr>
-          
+
             <tr ng-repeat="item in logResults">
                 <td>
                     {{item.FunctionName}}
                 </td>
                 <td>{{item.MessageText}}</td>
-                
+
                 <td>{{item.FullMessage}}</td>
                 <td>{{item.DateCreatedText}}</td>
                 <td>{{item.PageName}}</td>
