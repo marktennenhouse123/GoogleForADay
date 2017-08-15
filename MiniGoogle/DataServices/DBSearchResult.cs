@@ -214,13 +214,27 @@ namespace MiniGoogle.DataServices
                           
         }
 
+
+        private static string RemoveEndingSlash(string URL)
+        {
+            string tempURL = URL;
+            if (URL.EndsWith("/") || URL.EndsWith(@"\"))
+            {
+                tempURL = URL.Remove(URL.Length - 1, 1);
+            }
+            return tempURL;
+        }
         //helper for building the URL of a page when it comes without the HTTP.
         //Get name of page, sometimes without the previous folder in front of it.
         public static string GetFileWithFolder(string singleLink)
         {
+            string tempLink = RemoveEndingSlash(singleLink);
+
+
+
             if (singleLink.Contains("http"))
             {
-                return Path.GetFileName(singleLink);
+                return Path.GetFileName(tempLink);
             }
             else
             {
@@ -249,7 +263,10 @@ namespace MiniGoogle.DataServices
         public static void SaveTheLinks(ContentSearchResult searchResults, IndexedPage pg)
         {
             try
-            {
+            {   if (searchResults.Links.Count > 10)
+                {   //for speed, remove the links so we can see if the rest of the system works .
+                    searchResults.Links.RemoveRange(10, searchResults.Links.Count - 10);
+                }
                                
                 foreach (string singleLink in searchResults.Links)
                 {
@@ -439,7 +456,7 @@ namespace MiniGoogle.DataServices
                 pg.PageURL = searchResults.PageURL;
                 pg.ParentDirectory = searchResults.ParentDirectory;
                 pg.IndexedSiteID = searchResults.IndexedSiteID;
-                pg.Title = searchResults.Title;
+                pg.Title = searchResults.Title.Length > 50 ? searchResults.Title.Substring(0,49) : searchResults.Title;
                 if (!IsPageAlreadySaved(pg.PageURL, pg.PageName))
                 {
                     DB.IndexedPages.Add(pg);

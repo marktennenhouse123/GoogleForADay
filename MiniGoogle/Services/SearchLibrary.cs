@@ -22,7 +22,8 @@ namespace MiniGoogle.Services
         // of the first page which is in the DB
         public static string GetDirectoryForFile(string pageURL, int parentID)
             {
-            if (! pageURL.Contains("http"))
+            string fixedURL = RemoveEndingSlash(pageURL);
+            if (!fixedURL.Contains("http"))
             {
                 //retrieve the path from the database.
                 LinkedPageData pg = DBSearchResult.GetPageInfo(parentID);
@@ -32,9 +33,9 @@ namespace MiniGoogle.Services
             { 
                 //the URL might contain only a # or only the domain name.
 
-            var myRequest = new Uri(pageURL);
+            var myRequest = new Uri(fixedURL);
                 string lastPart = myRequest.Segments.Last() + myRequest.Query;
-            string parentFolder = pageURL.Replace(lastPart, "");
+            string parentFolder = fixedURL.Replace(lastPart, "");
           
                 return parentFolder;
             }
@@ -57,7 +58,7 @@ namespace MiniGoogle.Services
             {
                  searchResult = new ContentSearchResult();
                 searchResult.ParentID = parentID;
-                searchResult.PageName = Path.GetFileName(pageURL);
+                searchResult.PageName = GetFilenameFromURL(pageURL);
                 searchResult.IndexedSiteID = siteIndexID;
                 if (!DBSearchResult.IsPageContentIndexed(pageURL, searchResult.PageName))
                 {
@@ -92,6 +93,22 @@ namespace MiniGoogle.Services
             }
         }
 
+        private static string RemoveEndingSlash(string URL)
+        {
+            string tempURL = URL;
+            if (URL.EndsWith("/") || URL.EndsWith(@"\"))
+            {
+                tempURL = URL.Remove(URL.Length - 1, 1);
+            }
+            return tempURL;
+        }
+
+        private static string GetFilenameFromURL(string URL)
+        {
+            string fixedURL = RemoveEndingSlash(URL);
+           return Path.GetFileName(fixedURL);
+        }
+
         
         //extract the title (if it has one) from the HTML
         private static string GetPageTitle(string content, string pageName)
@@ -115,13 +132,17 @@ namespace MiniGoogle.Services
         //Get the body from the HTML if it can be extracted.
         private static string GetTextFromHTML(string docText)
         { try
-            {
+            {   //find a way to remove script contents and tags.
+               
+
                 HtmlDocument doc = new HtmlDocument();
                 doc.LoadHtml(docText);
                 var bodyNode = doc.DocumentNode.SelectSingleNode("//body");
                 if (bodyNode != null)
                 {
+
                     var nodeText = bodyNode.InnerText;
+                    
                     return nodeText;
                 }
                 else
@@ -144,10 +165,15 @@ namespace MiniGoogle.Services
         /// <returns>This returns the Head and body of the document</returns>
         private static string GetPageContent(string pageURL)
         { try
-            {
+            {     //this is a good place to remove the scripts from the content.
+                Regex scriptRemoval1 = new Regex(@"(?s)<script.*?(/>|</script>)");
+                Regex scriptRemoval2 = new Regex(@"(?s)<noscript.*?(/>|</noscript>)");
                 HtmlWeb web = new HtmlWeb();
                 HtmlDocument doc = web.Load(pageURL);
-                return doc.DocumentNode.InnerHtml;
+                string pageContent = doc.DocumentNode.InnerHtml;
+                string NoScriptContent = scriptRemoval1.Replace(pageContent, "");
+                 NoScriptContent = scriptRemoval2.Replace(NoScriptContent, "");
+                return NoScriptContent;
             }
             catch (Exception ex)
             {
