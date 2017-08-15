@@ -2,16 +2,7 @@
     ViewBag.Title = "Google JR";
 }
 <style>
-    .btn3dOLD {
-    position:relative;
-    border:0;
-    border-radius:3px;
-    margin:15px 10px 0 0;
-    transition:all .09s linear;
-    box-shadow:0 0 0 1px transparent inset, 0 0 0 2px rgba(255,255,255,0.15) inset, 6px 6px 0 0 #ccc, 6px 6px 0 1px rgba(0,0,0,0.2), 6px 6px 3px 0px rgba(0,0,0,0.3);
-    outline:medium none;
-    -moz-outline-style:none;
-}
+    
 
     .btn3d {
         position: relative;
@@ -24,16 +15,22 @@
         -moz-outline-style: none;
     }
 
-.btn3d:active {
-    top:7px;
-}
-.btn3d:focus {
-    outline:medium none;
-    -moz-outline-style:none;
-}
-.btn3d.btn-default {
-    background-color:#f5f5f5;
-}
+        .btn3d:active {
+            top: 7px;
+        }
+    .searchRow {
+        height:40px;
+
+    }
+        .btn3d:focus {
+            outline: medium none;
+            -moz-outline-style: none;
+        }
+
+        .btn3d.btn-default {
+            background-color: #f5f5f5;
+        }
+
     .loadingImage {
         position: fixed;
         z-index: 1000;
@@ -53,13 +50,20 @@
         border-collapse: collapse;
     }
 
-   
+    .inputStyleSearch {
+       width: 100%;
+        height: 40px;
+        font-size: 25px;
+        border-style: solid;
+        border-width: 2px;
+    }
+
     .inputStyle {
-    width: 90%;
-    height: 35px;
-    font-size:20px;
-    border-style: solid;
-    border-width: 2px;
+        width: 90%;
+        height: 35px;
+        font-size: 20px;
+        border-style: solid;
+        border-width: 2px;
     }
 
     table, th, td {
@@ -164,7 +168,7 @@
             var isHidden = $('#divCoderTools').is(':hidden');
             if (isHidden == true) {
                 tools.show()
-            
+
             }
             else {
                 tools.hide();
@@ -174,16 +178,13 @@
 
         }
 
-        $scope.ShowSection = function (someID)
-        { //1 is the index section
+        $scope.ShowSection = function (someID) { //1 is the index section
             //2 is the Search section
-            if (someID == 1)
-            {
+            if (someID == 1) {
                 $("#divIndex").show();
                 $("#divSearch").hide();
             }
-            else if (someID == 2)
-            {
+            else if (someID == 2) {
                 $("#divSearch").show();
                 $("#divIndex").hide();
             }
@@ -264,33 +265,34 @@
 </script>
 
 <div ng-app="MainApp" ng-controller="SearchController">
-   
-    <div class="row">
-            <div class="col-md-4 IndexResults"></div>
-            <div class="col-md-1 IndexResults">
-                <a href="" ng-click="ShowSection(2)">Search</a>
-            </div>
-            <div class="col-md-1 IndexResults " style="margin-left:25px">|</div>
-            <div class="col-md-1 IndexResults">
-               
-                <a href="" ng-click="ShowSection(1)">Index</a>
-            </div>
 
-            <div class="col-md-1 IndexResults">|
-            </div>
+    <div class="row">
+        <div class="col-md-4 IndexResults"></div>
+        <div class="col-md-1 IndexResults">
+            <a href="" ng-click="ShowSection(2)">Search</a>
+        </div>
+        <div class="col-md-1 IndexResults " style="margin-left:25px">|</div>
+        <div class="col-md-1 IndexResults">
+
+            <a href="" ng-click="ShowSection(1)">Index</a>
+        </div>
+
+        <div class="col-md-1 IndexResults">
+            |
+        </div>
         <div class="col-md-3">
 
             <a href="" class="IndexResults" ng-click="ShowCoderTools()">Debug</a>
 
             <div id="divCoderTools">
-                
+
                 <button ng-click="ClearAppLog()">Clear App Log</button>
                 <button ng-click="ShowAppLog()">Show/Hide App Log</button>
 
-               
+
             </div>
         </div>
-     </div>
+    </div>
     <div class="row">
         <div class="col-md-12 RowSpacer"><br /><br /><br /></div>
     </div>
@@ -312,16 +314,23 @@
 
     <div id="divSearch">
 
-
-
         <br />
         <div id="loadingImage" class="modal loadingImage">
             <p><img src="~/Content/LoadingImage.gif" /> Please Wait</p>
         </div>
         <br />
-        Search &nbsp;<input type="text" class="inputStyle" ng-model="keyword" /> <br />
+        <div class="row">
+            <div class="col-md-11">
+                <input type="text" class="inputStyleSearch" ng-model="keyword" />
+            </div>
+            <div class="col-md-1 searchRow">
+                <button class="btn btn-danger btn-lg  " ng-click="doSearch()">Search</button>
+               </div>
+        </div>
+
+
         <br />
-        <button ng-click="doSearch()">Search</button>
+
         <br />
         <div id="IndexedResults" class="IndexResults">
             Indexed {{pageCount}} Pages and {{keywordCount}} Words
