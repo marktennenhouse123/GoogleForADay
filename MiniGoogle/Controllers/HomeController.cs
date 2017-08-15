@@ -104,15 +104,16 @@ namespace MiniGoogle.Controllers
         /// <returns></returns>
         public JsonResult doPageIndexing(string pageName, int parentID, int siteIndexID)
         {
+            SearchTotal finalCount;
             try
             {
                 //this method runs recursively. 
                 ContentSearchResult result = SearchLibrary.CreateIndexForPage(pageName, parentID, siteIndexID);
-              
-                
+
+
                 //  //now that the first page is indexed and the links are inserted, retrieve each of the pages in the links.
                 List<LinkedPageData> pageLinks = DBSearchResult.GetLinkDataForSiteIndexID(result.IndexedSiteID);
-                                               
+
                 foreach (LinkedPageData item in pageLinks)
                 {
                     string fullURL = string.Join("", item.PageDirectory, item.PageName);
@@ -123,39 +124,37 @@ namespace MiniGoogle.Controllers
                         {
                             return doPageIndexing(fullURL, item.ParentID, siteIndexID);
                         }
-                        else
-                        {
-                            SearchTotal finalCount = DBSearchResult.GetIndexedPageTotals(siteIndexID);
-                            return Json( finalCount, JsonRequestBehavior.AllowGet);
-                        }
-                        
+                      
+
                     }
 
                 }
 
-                //now go get the totals.
-                return new JsonResult(); // get query totals.
+                
+
             }
             catch (DbEntityValidationException ex)
             {
 
                 MessageLogger.LogThis(ex);
                 Server.ClearError();
-                SearchTotal finalCount = DBSearchResult.GetIndexedPageTotals(siteIndexID);
-                return Json(finalCount, JsonRequestBehavior.AllowGet);
+
 
             }
             catch (Exception ex)
             {
                 MessageLogger.LogThis(ex);
                 Server.ClearError();
-                SearchTotal finalCount = DBSearchResult.GetIndexedPageTotals(siteIndexID);
-                return Json(finalCount, JsonRequestBehavior.AllowGet);
+
 
             }
-
-            
+            finally {
+                 finalCount = DBSearchResult.GetIndexedPageTotals(siteIndexID);
+                
             }
+
+            return Json(finalCount, JsonRequestBehavior.AllowGet);
+        }
         }
     }
     

@@ -3,6 +3,9 @@ select * from IndexedSites
 
 select * from Indexedpages
 select * from PageKeyWords
+select * from AppLog
+
+
 
 delete from AppLog
 
