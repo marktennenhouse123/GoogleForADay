@@ -30,7 +30,7 @@
     }
     .ErrorMessage {
         font: bold;
-        font-size: 15px;
+        font-size: 20px;
     }
 </style>
 <script>
@@ -44,14 +44,16 @@
         
 
 
-
-        $scope.pageName = "http://googleforaday.azurewebsites.net/SamplePage.html";
-        //"http://localhost:50529/SamplePage.html";
+        //test page 
+        $scope.pageName = "http://localhost:50529/SamplePage.html";
+            // "http://googleforaday.azurewebsites.net/SamplePage.html";
+        
 
         //"https://www.theverge.com/search?q=piano";
-
+        //main variable for search results
         $scope.results = "";
 
+        //main function for indexing a site.
         $scope.IndexThePages = function () {
             var url = "/Home/startPageIndexProcess";
             var postData = { pageName: $scope.pageName };
@@ -63,12 +65,12 @@
                 
 
                 $scope.ShowLoadingImage(false);
-                if (data.length > 0 ) {
+                if (data.data != undefined ) {    //if totals fail to come back show the error message.
                     $scope.pageCount = data.data.PagesIndexed;
                     $scope.keywordCount = data.data.KeywordsIndexed;
                     $("#IndexedResults").show();
                 }
-                else {
+                else { // this means there were some errors found.
                     $("#IndexingError").show();
                 }
                 //  alert(data.data);
@@ -83,6 +85,7 @@
             $scope.results = data.data;
         };
 
+        //main search function for finding matched text.
         $scope.doSearch = function () {
             $("#IndexedResults").hide();
             $("#IndexingError").hide();
@@ -96,6 +99,8 @@
             });
 
         }
+
+        //waiting message shows until a response comes back.
         $scope.ShowLoadingImage = function (makeVisible) {
             if (makeVisible) {
                 $("#loadingImage").show();
@@ -107,7 +112,8 @@
 
         }
 
-
+        // application log displays errors to help debugging.
+        //the hide and show is in this function.
         $scope.ShowCoderTools = function () {
             var tools = $("#divCoderTools");
             var isHidden = $('#divCoderTools').is(':hidden');
@@ -128,10 +134,9 @@
 
 
         
-
+        //show and hide the applog fields.
         $scope.ShowAppLog = function () {
-
-
+            
             var appLog = $("#divAppLog");
             var isHidden = $('#divAppLog').is(':hidden');
             if (isHidden == true) {
@@ -154,6 +159,7 @@
             }
         }
 
+        //delete the application log entirely.
         $scope.ClearAppLog = function () {
             var url = "/Home/ClearAppLog";
             $scope.ShowLoadingImage(true);
@@ -168,6 +174,7 @@
             });
         }
 
+        //this is the load function for the page.
         $scope.RunSetup = function ()
         {
             $scope.ShowAppLog();
@@ -176,6 +183,7 @@
             $("#IndexingError").hide();
         }
 
+        //this clears all of the indexed values in all tables.
         $scope.ClearAll = function () {
 
             var url = "/Home/ClearAll";
@@ -247,10 +255,11 @@
         <table>
             <tr>
                 <td>Function</td>
-                <td>EntityErrors</td>
-                <td>Page</td>
+                <td>Message</td>
+                
                 <td>Stack Trace</td>
                 <td>DateCreated</td>
+                <td>Page</td>
 
             </tr>
           
@@ -258,10 +267,11 @@
                 <td>
                     {{item.FunctionName}}
                 </td>
-                <td>{{item.EntityErrors}}</td>
-                <td>{{item.PageName}}</td>
+                <td>{{item.MessageText}}</td>
+                
                 <td>{{item.FullMessage}}</td>
-                <td>{{item.DateCreated}}</td>
+                <td>{{item.DateCreatedText}}</td>
+                <td>{{item.PageName}}</td>
 
 
             </tr>

@@ -17,6 +17,9 @@ namespace MiniGoogle.Services
     
     public class SearchLibrary
     {
+        //Get the parent folder of a page.
+        //if it has no HTTP we need to find the parent from the parent 
+        // of the first page which is in the DB
         public static string GetDirectoryForFile(string pageURL, int parentID)
             {
             if (! pageURL.Contains("http"))
@@ -36,10 +39,13 @@ namespace MiniGoogle.Services
                 return parentFolder;
             }
         }
-      
+
         /// <summary>
         /// Load a page and then extract the links and text from a single page.
-        /// 
+        /// //then load all of them into the main container= ContentSearchResult
+        ///Main Object-ContentSearchResult: Container object for all the properties.
+        /////This method loads and then passes the container to the save method. 
+        //this saves all the links, and keywords 
         /// </summary>
         /// <param name="pageURL"></param>
         /// <returns></returns>
@@ -86,40 +92,8 @@ namespace MiniGoogle.Services
             }
         }
 
-        public static void FixEndlessLoop(List<LinkedPageData> PreviousPageLinks, List<LinkedPageData> currentPageLinks)
-        {
-            if (PreviousPageLinks.Count != currentPageLinks.Count)
-            {
-                if (PreviousPageLinks == currentPageLinks)
-                { //this means we are stuck in an endless loop unable to handle a certain URL.
-
-                    var resultOfComparing = currentPageLinks.Except(PreviousPageLinks).ToList();
-                    if (resultOfComparing.Count == 0)
-                    {
-                        //update these as already indexed or failed.
-                        foreach (var item in currentPageLinks)
-                        {
-
-                            DBSearchResult.UpdateIsIndexedFlag(item.PageID);
-
-                        }
-
-                    }
-                    else
-                    {
-                        PreviousPageLinks = currentPageLinks;
-                    }
-
-                }
-
-            }
-            else if (PreviousPageLinks.Equals(null))
-            {
-                //this is only when the count == 0
-                PreviousPageLinks = currentPageLinks;
-            }
-        }
-
+        
+        //extract the title (if it has one) from the HTML
         private static string GetPageTitle(string content, string pageName)
         {
 
@@ -137,6 +111,8 @@ namespace MiniGoogle.Services
 
         }
 
+
+        //Get the body from the HTML if it can be extracted.
         private static string GetTextFromHTML(string docText)
         { try
             {
@@ -165,12 +141,19 @@ namespace MiniGoogle.Services
         /// Return the text of the document.
         /// </summary>
         /// <param name="pageURL"></param>
-        /// <returns></returns>
+        /// <returns>This returns the Head and body of the document</returns>
         private static string GetPageContent(string pageURL)
-        {
-            HtmlWeb web = new HtmlWeb();
-            HtmlDocument doc = web.Load(pageURL);
-            return doc.DocumentNode.InnerHtml;
+        { try
+            {
+                HtmlWeb web = new HtmlWeb();
+                HtmlDocument doc = web.Load(pageURL);
+                return doc.DocumentNode.InnerHtml;
+            }
+            catch (Exception ex)
+            {
+                MessageLogger.LogThis(ex);
+                return "";
+            }
         }
 
 
@@ -192,7 +175,7 @@ namespace MiniGoogle.Services
             
             foreach (var grp in groupedWords)
             {
-               
+               //main object to save and retrieve the keywork ranking =count and name of each word.
                 KeywordRanking singleRanking = new KeywordRanking();
                                 
                 singleRanking.Keyword =  grp.Key.Length > 50 ? grp.Key.Substring(0,50): grp.Key; //the key is each word
@@ -205,7 +188,8 @@ namespace MiniGoogle.Services
         }
 
 
-
+        //extract the links from the HTML.
+        //uses Null Guard helper class in case the nodes return an error.
         public static List<string>   GetLinks(string docText)
         {
             HtmlDocument doc = new HtmlDocument();

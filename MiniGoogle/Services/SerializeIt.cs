@@ -10,7 +10,7 @@ namespace MiniGoogle.Services
 {
     public   class SerializeIt
     {
-       
+       // helper for capturing the data for error messages.
             public static string SerializeThis(object thing)
             {
                 if (thing == null) return string.Empty;

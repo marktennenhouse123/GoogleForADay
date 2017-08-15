@@ -14,6 +14,7 @@ namespace MiniGoogle.Models
         public string PageName { get; set; }
         public string AppName { get; set; }
         public Nullable<System.DateTime> DateCreated { get; set; }
+        public string DateCreatedText { get; set; }
         public string EntityErrors { get; set; }
         public string ObjectData { get; set; }
     }

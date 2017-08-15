@@ -15,17 +15,17 @@ namespace MiniGoogle.Controllers
     public class HomeController : Controller
     {
 
-
+        //configured in Web.config
         int NUMBER_OF_LEVELS = 0;
          bool LimitReached { get; set; }
-             
-        List<LinkedPageData> PreviousPageLinks { get; set; }   //this is used for handling pages that cannot be indexed.
-
+       
+        
         public ActionResult Index()
         {
             return View();
         }
 
+        //clear application log of all messages.
         public JsonResult ClearAppLog()
         {
             DBSearchResult.ClearEventLog();
@@ -42,9 +42,11 @@ namespace MiniGoogle.Controllers
 
         /// <summary>
         /// Search for the keyword in all pages.
+        /// 
         /// </summary>
         /// <param name="keyword"></param>
-        /// <returns></returns>
+        /// <returns> returns  list Keyword Ranking by page and # of occurences with link to each.
+        /// </returns>
         public JsonResult RunSearch(string keyword)
         {
             List<KeywordRanking> rankingList = DBSearchResult.GetKeywordRanking(keyword);
@@ -52,12 +54,22 @@ namespace MiniGoogle.Controllers
 
         }
 
+        //retrieve application log for debugging.
         public JsonResult GetAppLog()
         {
             List<AppLogVM> LogResults = DBSearchResult.GetAppLog();
             return Json(LogResults, JsonRequestBehavior.AllowGet);
         }
 
+
+        /// <summary>
+        /// Main Indexing process starts here.
+        /// Step 1: Create an IndexedSiteID for grouping all the upcoming pages
+        /// Step 2: Make Recursive call to DoPageIndexing. This will loop on itself.
+        /// 
+        /// </summary>
+        /// <param name="pageName"></param>
+        /// <returns></returns>
         public JsonResult startPageIndexProcess(string pageName) {
             try
             {
@@ -72,11 +84,16 @@ namespace MiniGoogle.Controllers
             catch (Exception ex)
             {
                 MessageLogger.LogThis(ex);
+                //Run query to return results.
+
             }
             return null;
           
         }
         /// <summary>
+        /// This is the main workhorse which runs recursively.
+        /// It will stop once the GoneFarEnough returns a true value for the LimitReached.
+        /// LimitReached is in the webconfig. It controls the # of levels to walk/traverse.
         /// The pageName is the current url to index
         /// The ParentID is the ID of the page which contains the link.
         /// The SiteIndexID is the ID assigned to the site or group of related pages which is being indexed
@@ -91,22 +108,11 @@ namespace MiniGoogle.Controllers
             {
                 //this method runs recursively. 
                 ContentSearchResult result = SearchLibrary.CreateIndexForPage(pageName, parentID, siteIndexID);
-                if (result.PageID <= 0)
-                { string message = string.Format("CreateIndexForPage Failed to create index for page{0} parentID {1}, siteindex {2}, line 83", pageName, parentID, siteIndexID);
-                    Exception ex = new Exception(message);
-
-                    MessageLogger.LogThis(ex);
-                    
-                }
+              
                 
                 //  //now that the first page is indexed and the links are inserted, retrieve each of the pages in the links.
                 List<LinkedPageData> pageLinks = DBSearchResult.GetLinkDataForSiteIndexID(result.IndexedSiteID);
-                //if (PreviousPageLinks == null)
-                //{
-                //    PreviousPageLinks = pageLinks;
-                //}
-              
-                                
+                                               
                 foreach (LinkedPageData item in pageLinks)
                 {
                     string fullURL = string.Join("", item.PageDirectory, item.PageName);
@@ -134,13 +140,17 @@ namespace MiniGoogle.Controllers
             {
 
                 MessageLogger.LogThis(ex);
-                return null;
+                Server.ClearError();
+                SearchTotal finalCount = DBSearchResult.GetIndexedPageTotals(siteIndexID);
+                return Json(finalCount, JsonRequestBehavior.AllowGet);
 
             }
             catch (Exception ex)
             {
                 MessageLogger.LogThis(ex);
-                return null;
+                Server.ClearError();
+                SearchTotal finalCount = DBSearchResult.GetIndexedPageTotals(siteIndexID);
+                return Json(finalCount, JsonRequestBehavior.AllowGet);
 
             }
 

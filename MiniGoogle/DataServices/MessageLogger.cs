@@ -15,7 +15,7 @@ namespace MiniGoogle.DataServices
         static CloudDBEntities DB = new CloudDBEntities();
 
         
-
+        //logger for general exceptions and data that caused the error.
         public static void LogThis(Exception ex, string someData)
         {
             try
@@ -44,6 +44,7 @@ namespace MiniGoogle.DataServices
             LogThis(ex, "");
 
         }
+        //Logger for table based errors. allows coder to see actual entity errors.
         public static void LogThis(DbEntityValidationException ex, string someData)
         {
             try
@@ -81,6 +82,8 @@ namespace MiniGoogle.DataServices
             }
         }
 
+
+        //Get name of previously executed method (frame) from the stack trace
         private static string GetExecutingMethodName(Exception exception)
         {
             try

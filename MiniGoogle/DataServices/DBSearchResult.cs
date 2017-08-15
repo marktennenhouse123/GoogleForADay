@@ -15,6 +15,8 @@ namespace MiniGoogle.DataServices
     {
        public static CloudDBEntities DB = new CloudDBEntities();
 
+        //helper for finding existing pages to update title or other fields
+        //for an already saved link.
         public static LinkedPageData GetPageInfo(int pageID)
         {
             var pageInfo = (from pg in DB.IndexedPages
@@ -131,11 +133,12 @@ namespace MiniGoogle.DataServices
             return result;
         }
 
+        //clears the AppLogs table.
         public static void ClearEventLog()
         { 
             try
             {
-                //use stored proc..this is too slow.
+                
                 var msgs = DB.AppLogs.ToList();
                 foreach (var item in msgs)
                 {
@@ -150,6 +153,7 @@ namespace MiniGoogle.DataServices
             }
         }
 
+        //this resets the system by clearing all tables.
         public static void ClearAllSearchResults()
         {
            
@@ -172,6 +176,7 @@ namespace MiniGoogle.DataServices
         }
 
         //is the current page already indexed or not?
+        //This is used to decide whether to index a link that came from a parent page.
         public static bool IsPageContentIndexed(string pageURL, string pageName)
         {
             Uri siteURL = new Uri(pageURL);
@@ -187,6 +192,7 @@ namespace MiniGoogle.DataServices
         }
 
         //has the page been saved alread?
+        //A link might have been inserted already. This avoids duplicates.
         public static bool IsPageAlreadySaved(string pageURL, string pageName)
         {try
             {
@@ -208,6 +214,7 @@ namespace MiniGoogle.DataServices
                           
         }
 
+        //helper for building the URL of a page when it comes without the HTTP.
         //Get name of page, sometimes without the previous folder in front of it.
         public static string GetFileWithFolder(string singleLink)
         {
@@ -238,7 +245,7 @@ namespace MiniGoogle.DataServices
         }
 
        
-
+        //Saves the links which are pulled from the HTML of a page.
         public static void SaveTheLinks(ContentSearchResult searchResults, IndexedPage pg)
         {
             try
@@ -285,7 +292,7 @@ namespace MiniGoogle.DataServices
             }
 
         }
-
+        //some links are on the same page or is only the domain page..skip these.
         public static bool IsValidLink(string pageURL)
         {   // if the url is too short 
             //or is the same as the domain this will throw an error
@@ -311,12 +318,15 @@ namespace MiniGoogle.DataServices
             return true;
         }
 
+
+        //get the whole appLog. Normally, this would have a filter by appname or id.
         public static List<AppLogVM> GetAppLog()
         {
             var results = (from ap in DB.AppLogs
                            select new AppLogVM {
                              AppName = ap.AppName,
                              DateCreated = ap.DateCreated,
+                             DateCreatedText = ap.DateCreated.ToString(),
                              EntityErrors = ap.EntityErrors,
                              FullMessage = ap.FullMessage,
                              FunctionName = ap.FunctionName,
@@ -328,6 +338,8 @@ namespace MiniGoogle.DataServices
 
             
         }
+
+        //save each word and the # of times it occurs, word by word found on a parent page.
         public static void SaveTheKeywords(ContentSearchResult searchResults, IndexedPage pg)
         {
             
@@ -365,6 +377,7 @@ namespace MiniGoogle.DataServices
         }
 
         //Get the data for a page so it can be indexed.
+        //used for requesting the content based on the URL.
         public static IndexedPage GetPageByName(string pageURL, string pageName)
         {
 
@@ -395,6 +408,7 @@ namespace MiniGoogle.DataServices
         }
 
         //get a group index for all the pages in a "run"
+        //The IndexedSiteID is a grouping of all the pages that are indexed for a site.
         public static int GetNewSiteIndex(string domain, string page)
         { // insert to the SiteIndexes table
             
@@ -408,7 +422,7 @@ namespace MiniGoogle.DataServices
         }
 
 
-        //Main=BIG save method for the content, links and keywords of a page.
+        //Main Method that calls several Save methods for the content, links and keywords of a page.
         public static int SaveSearchResults(ContentSearchResult searchResults)
         {
             try
