@@ -110,14 +110,14 @@
         $scope.IndexThePages = function () {
             var url = "/Home/startPageIndexProcess";
             var postData = { pageName: $scope.pageName };
-            $scope.ShowLoadingImage(true);
+            $scope.ShowLoadingImage2(true);
             $("#IndexingError").hide();
 
             $http.post(url, postData)
             .then(function (data) {
 
 
-                $scope.ShowLoadingImage(false);
+                $scope.ShowLoadingImage2(false);
                 if (data.data != undefined) {    //if totals fail to come back show the error message.
                     $scope.pageCount = data.data.PagesIndexed;
                     $scope.keywordCount = data.data.KeywordsIndexed;
@@ -150,6 +150,18 @@
 
                 $scope.displayResults(data);
             });
+
+        }
+
+        //waiting message shows until a response comes back.
+        $scope.ShowLoadingImage2 = function (makeVisible) {
+            if (makeVisible) {
+                $("#loadingImage2").show();
+            }
+            else {
+                $("#loadingImage2").hide();
+
+            }
 
         }
 
@@ -205,11 +217,11 @@
                 appLog.show()
                 var url = "/Home/GetAppLog";
 
-                $scope.ShowLoadingImage(true);
+                $scope.ShowLoadingImage2(true);
                 $http.post(url, '')
             .then(function (data) {
                 $scope.logResults = data.data;
-                $scope.ShowLoadingImage(false);
+                $scope.ShowLoadingImage2(false);
 
             })
 
@@ -224,11 +236,11 @@
         //delete the application log entirely.
         $scope.ClearAppLog = function () {
             var url = "/Home/ClearAppLog";
-            $scope.ShowLoadingImage(true);
+            $scope.ShowLoadingImage2(true);
             $("#IndexingError").hide();
             $http.post(url, '')
             .then(function (data) {
-                $scope.ShowLoadingImage(false);
+                $scope.ShowLoadingImage2(false);
                 alert(data.data);
                 $scope.logResults = "";
 
@@ -245,6 +257,8 @@
             $("#IndexedResults").hide();
             $("#IndexingError").hide();
             $scope.ShowSection(1);
+            $scope.pageCount = 0;
+            $scope.keywordCount = 0;
         }
 
         //this clears all of the indexed values in all tables.
@@ -252,12 +266,14 @@
 
             var url = "/Home/ClearAll";
             var postData = {};
-            $scope.ShowLoadingImage(true);
+            $scope.ShowLoadingImage2(true);
             $http.post(url, postData)
             .then(function (data) {
                 $scope.results = "";
-
-                $scope.ShowLoadingImage(false);
+                $scope.pageCount = 0;
+                $scope.keywordCount = 0;
+                $("#IndexedResults").hide();
+                $scope.ShowLoadingImage2(false);
                 alert(data.data);
             })
         };
@@ -301,6 +317,9 @@
         <div class="col-md-12 RowSpacer"><br /><br /><br /></div>
     </div>
     <div id="divIndex">
+        <div id="loadingImage2" class="modal loadingImage">
+            <p><img src="~/Content/LoadingImage.gif" /> Please Wait</p>
+        </div>
         <div class="row">
             <input type="text" class="inputStyle" ng-model="pageName" />
         </div>

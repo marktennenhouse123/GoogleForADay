@@ -262,6 +262,7 @@ namespace MiniGoogle.DataServices
         //Saves the links which are pulled from the HTML of a page.
         public static void SaveTheLinks(ContentSearchResult searchResults, IndexedPage pg)
         {
+            List<IndexedPage> linkPages = new List<IndexedPage>();
             try
             {   if (searchResults.Links.Count > 10)
                 {   //for speed, remove the links so we can see if the rest of the system works .
@@ -287,11 +288,14 @@ namespace MiniGoogle.DataServices
                         
                         if (IsValidLink(cp.PageURL) && !DBSearchResult.IsPageAlreadySaved(cp.PageURL, cp.PageName))
                         {
-                            DB.IndexedPages.Add(cp);
-                            DB.SaveChanges();
+                          
+                            linkPages.Add(cp);
                         }
                     }
                 }
+                
+                DB.IndexedPages.AddRange(linkPages);
+                DB.SaveChanges();
             }
             catch (DbEntityValidationException ex)
             {
@@ -309,6 +313,7 @@ namespace MiniGoogle.DataServices
             }
 
         }
+
         //some links are on the same page or is only the domain page..skip these.
         public static bool IsValidLink(string pageURL)
         {   // if the url is too short 
@@ -359,7 +364,7 @@ namespace MiniGoogle.DataServices
         //save each word and the # of times it occurs, word by word found on a parent page.
         public static void SaveTheKeywords(ContentSearchResult searchResults, IndexedPage pg)
         {
-            
+            List<PageKeyWord> keywordRankingList = new List<PageKeyWord>();
             try
             {
                 //save the keywords for this page.
@@ -369,10 +374,10 @@ namespace MiniGoogle.DataServices
                     pkw.PageID = pg.PageID;
                     pkw.Keyword = kw.Keyword;
                     pkw.KeywordCount = kw.Rank;
-                    DB.PageKeyWords.Add(pkw);
-                    DB.SaveChanges();
-
+                    keywordRankingList.Add(pkw);
                 }
+                DB.PageKeyWords.AddRange(keywordRankingList);
+                DB.SaveChanges();
             }
             catch (Exception ex)
             {
