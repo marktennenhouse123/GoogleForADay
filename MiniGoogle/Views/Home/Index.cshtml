@@ -2,7 +2,11 @@
     ViewBag.Title = "Google JR";
 }
 <style>
-    
+
+    .moveUpALittle {
+        margin-top: -6px!important;
+
+    }
 
     .btn3d {
         position: relative;
@@ -310,6 +314,11 @@
             <div class="col-md-2 IndexResults"><button class="btn btn-lg btn3d btn-danger" ng-click="ClearAll()">CLEAR</button></div>
             <div class="col-md-2"></div>
         </div>
+        <br />
+        <br />
+        <div id="IndexedResults" class="IndexResults">
+            Indexed {{pageCount}} Pages and {{keywordCount}} Words
+        </div>
     </div>
 
     <div id="divSearch">
@@ -324,7 +333,7 @@
                 <input type="text" class="inputStyleSearch" ng-model="keyword" />
             </div>
             <div class="col-md-1 searchRow">
-                <button class="btn btn-danger btn-lg  " ng-click="doSearch()">Search</button>
+                <button class="btn btn-danger btn-lg moveUpALittle btn3d  " ng-click="doSearch()">Search</button>
                </div>
         </div>
 
@@ -332,9 +341,7 @@
         <br />
 
         <br />
-        <div id="IndexedResults" class="IndexResults">
-            Indexed {{pageCount}} Pages and {{keywordCount}} Words
-        </div>
+       
         <div id="IndexingError" class="ErrorMessage">Completed with errors; Please check the app log in Coder Tools.</div>
         <table>
 

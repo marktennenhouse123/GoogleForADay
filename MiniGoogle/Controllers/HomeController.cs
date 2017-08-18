@@ -9,6 +9,10 @@ using MiniGoogle.DataServices;
 using System.Data.Entity.Validation;
 using System.Diagnostics;
 using System.Configuration;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using System.Net;
+
 
 namespace MiniGoogle.Controllers
 {
@@ -107,14 +111,16 @@ namespace MiniGoogle.Controllers
             SearchTotal finalCount;
             try
             {
-                //this method runs recursively. 
-                ContentSearchResult result = SearchLibrary.CreateIndexForPage(pageName, parentID, siteIndexID);
-
-
+                //this method runs recursively.
+                
+                ContentSearchResult csr  =SearchLibrary.LoadPageContent(pageName, parentID, siteIndexID);
+                SearchLibrary.GetLinksAndKeywords(csr);
+                csr.PageID = DBSearchResult.SaveSearchResults(csr);
+                
                 //  //now that the first page is indexed and the links are inserted, retrieve each of the pages in the links.
-                List<LinkedPageData> pageLinks = DBSearchResult.GetLinkDataForSiteIndexID(result.IndexedSiteID);
-
+                List<LinkedPageData> pageLinks = DBSearchResult.GetLinkDataForSiteIndexID(csr.IndexedSiteID);
                 foreach (LinkedPageData item in pageLinks)
+               
                 {
                     string fullURL = string.Join("", item.PageDirectory, item.PageName);
                     if (!DBSearchResult.IsPageContentIndexed(fullURL, item.PageName))
@@ -125,21 +131,14 @@ namespace MiniGoogle.Controllers
                             return doPageIndexing(fullURL, item.ParentID, siteIndexID);
                         }
                       
-
                     }
 
                 }
-
-                
-
-            }
+              }
             catch (DbEntityValidationException ex)
             {
-
                 MessageLogger.LogThis(ex);
                 Server.ClearError();
-
-
             }
             catch (Exception ex)
             {

@@ -178,7 +178,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\AppLog.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>
@@ -222,7 +221,6 @@
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AppLogPage.html" />
     <Content Include="App_Data\aspnet-MiniGoogle-20170807034547.mdf" />
     <Content Include="App_Data\aspnet-MiniGoogle-20170807034547_log.ldf">
       <DependentUpon>aspnet-MiniGoogle-20170807034547.mdf</DependentUpon>
@@ -292,8 +290,6 @@
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Home\About.cshtml" />
-    <Content Include="Views\Home\Contact.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />

@@ -11,6 +11,10 @@ using System;
 using System.Diagnostics;
 using System.Data.Entity.Validation;
 
+using System.Configuration;
+using System.Threading.Tasks;
+using System.Collections.Concurrent;
+using System.Text;
 
 namespace MiniGoogle.Services
 {
@@ -66,7 +70,7 @@ namespace MiniGoogle.Services
         /// </summary>
         /// <param name="pageURL"></param>
         /// <returns></returns>
-        public static ContentSearchResult CreateIndexForPage(string pageURL, int parentID, int siteIndexID)
+        public static ContentSearchResult CreateIndexForPageOLD(string pageURL, int parentID, int siteIndexID)
         {
             ContentSearchResult searchResult = null;
             //check if this page has been indexed BEFORE getting the content.
@@ -79,6 +83,7 @@ namespace MiniGoogle.Services
                 if (!DBSearchResult.IsPageContentIndexed(pageURL, searchResult.PageName))
                 {
                     searchResult.SearchContent = GetPageContent(pageURL);
+
                     searchResult.Title = GetPageTitle(searchResult.SearchContent, searchResult.PageName);
                     searchResult.ParentDirectory = GetDirectoryForFile(pageURL, parentID);
                     searchResult.PageURL = pageURL;
@@ -106,6 +111,73 @@ namespace MiniGoogle.Services
             {
                 MessageLogger.LogThis(ex);
                 return null;
+            }
+        }
+
+        public static void GetLinksAndKeywords(ContentSearchResult sr)
+        {
+            
+            //check if this page has been indexed BEFORE getting the content.
+            try
+            {
+               if (!DBSearchResult.IsPageContentIndexed(sr.PageURL , sr.PageName))
+                {   sr.Title = GetPageTitle(sr.SearchContent, sr.PageName);
+                    sr.ParentDirectory = GetDirectoryForFile(sr.PageURL, sr.ParentID);
+                    sr.PageURL = sr.PageURL;
+                    sr.TextContent = GetTextFromHTML(sr.SearchContent);
+
+                    //use the full page content to extract the links
+                    sr.Links = GetLinks(sr.SearchContent);
+
+                    //use ONLY the cleaned text to find the keyword ranking.
+                    sr.KeyWordRankingList = GetKeywordCounts(sr.TextContent);
+               }
+               
+            }
+            catch (DbEntityValidationException ex)
+            {
+                string data = Services.SerializeIt.SerializeThis(sr);
+                MessageLogger.LogThis(ex, data);
+                
+            }
+            catch (Exception ex)
+            {
+                MessageLogger.LogThis(ex);
+                
+            }
+        }
+
+
+        public static ContentSearchResult LoadPageContent(string pageURL, int parentID, int siteIndexID)
+        {
+            ContentSearchResult searchResult = null;
+            searchResult = new ContentSearchResult();
+            //check if this page has been indexed BEFORE getting the content.
+            try
+            {
+                
+                searchResult.ParentID = parentID;
+                searchResult.PageName = GetFilenameFromURL(pageURL);
+                searchResult.IndexedSiteID = siteIndexID;
+                searchResult.PageURL = pageURL;
+                
+                if (!DBSearchResult.IsPageContentIndexed(pageURL, searchResult.PageName))
+                {
+                    searchResult.SearchContent = GetPageContent(pageURL);
+
+                }
+                return searchResult;
+            }
+
+            catch (AggregateException ex)
+            {                
+                MessageLogger.LogThis(ex);
+                return searchResult;
+            }
+            catch (Exception ex)
+            {
+                MessageLogger.LogThis(ex);
+                return searchResult;
             }
         }
 
