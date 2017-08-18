@@ -75,7 +75,13 @@ namespace MiniGoogle.DataServices
                     where pid.IsIndexed == true
                     && pid.IndexedSiteID == siteIndexID
                     select new { pid.ParentID };
-           return  r.Distinct().Count() >= someLevel;
+            if (r.Any())
+            {
+                return r.Distinct().Count() >= someLevel;
+            }
+            else
+            { return false;
+            }
         }
 
         ///group the pages by pageURL and sum up the keyword counts

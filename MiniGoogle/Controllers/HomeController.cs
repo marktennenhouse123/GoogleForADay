@@ -83,7 +83,15 @@ namespace MiniGoogle.Controllers
 
                 //create a record to serve as a groupID  for the site or group of pages to index.
                 int siteIndexID = DBSearchResult.GetNewSiteIndex(Folder, actualPage);
-                return doPageIndexing(pageName, -1, siteIndexID);
+
+                //now save the first page so that the parallel functions have links to use.
+               ContentSearchResult csr = SearchLibrary.LoadPageContent(pageName, -1, siteIndexID);
+                SearchLibrary.GetLinksAndKeywords(csr);
+                csr.PageID = DBSearchResult.SaveSearchResults(csr);
+
+                //now everything is ready to run in a loop until all pages have been indexed.
+
+                return doPageIndexing( -1, siteIndexID);
             }
             catch (Exception ex)
             {
@@ -94,6 +102,12 @@ namespace MiniGoogle.Controllers
             return null;
           
         }
+
+        
+
+
+
+
         /// <summary>
         /// This is the main workhorse which runs recursively.
         /// It will stop once the GoneFarEnough returns a true value for the LimitReached.
@@ -106,35 +120,36 @@ namespace MiniGoogle.Controllers
         /// <param name="parentID"></param>
         /// <param name="siteIndexID"></param>
         /// <returns></returns>
-        public JsonResult doPageIndexing(string pageName, int parentID, int siteIndexID)
+        public JsonResult doPageIndexing( int parentID, int siteIndexID)
         {
             SearchTotal finalCount;
             try
             {
-                //this method runs recursively.
-                
-                ContentSearchResult csr  =SearchLibrary.LoadPageContent(pageName, parentID, siteIndexID);
-                SearchLibrary.GetLinksAndKeywords(csr);
-                csr.PageID = DBSearchResult.SaveSearchResults(csr);
-                
-                //  //now that the first page is indexed and the links are inserted, retrieve each of the pages in the links.
-                List<LinkedPageData> pageLinks = DBSearchResult.GetLinkDataForSiteIndexID(csr.IndexedSiteID);
-                foreach (LinkedPageData item in pageLinks)
-               
+                //this method runs recursively until the limit is reached.
+                ConcurrentBag<ContentSearchResult> searchResults = new ConcurrentBag<ContentSearchResult>();
+                // get the links from the saved links
+                bool limitReached = DBSearchResult.GoneFarEnough(NUMBER_OF_LEVELS, siteIndexID);
+                if (!limitReached)
                 {
-                    string fullURL = string.Join("", item.PageDirectory, item.PageName);
-                    if (!DBSearchResult.IsPageContentIndexed(fullURL, item.PageName))
-                    {
-                        bool limitReached = DBSearchResult.GoneFarEnough(NUMBER_OF_LEVELS, item.IndexedSiteID.Value);
-                        if (!limitReached)
-                        {
-                            return doPageIndexing(fullURL, item.ParentID, siteIndexID);
-                        }
-                      
-                    }
+                    List<LinkedPageData> pageLinksMain = DBSearchResult.GetLinkDataForSiteIndexID(siteIndexID);
 
+                    //put the links into a list so that they can be run in Parallel.
+                    Parallel.ForEach(pageLinksMain, (sr) =>
+                {
+                    string fullURL = string.Join("", sr.PageDirectory, sr.PageName);
+                    ContentSearchResult csr = SearchLibrary.LoadPageContent(fullURL, sr.ParentID, siteIndexID);
+                    searchResults.Add(csr);
+                });
+
+                    // now that all the links have content, do a regular loop for the parsing and saving .
+                    foreach (ContentSearchResult csr in searchResults)
+                    {
+                        SearchLibrary.GetLinksAndKeywords(csr);
+                        csr.PageID = DBSearchResult.SaveSearchResults(csr);
+                        doPageIndexing(csr.PageID, siteIndexID);
+                    }
                 }
-              }
+            }
             catch (DbEntityValidationException ex)
             {
                 MessageLogger.LogThis(ex);
@@ -147,9 +162,10 @@ namespace MiniGoogle.Controllers
 
 
             }
-            finally {
-                 finalCount = DBSearchResult.GetIndexedPageTotals(siteIndexID);
-                
+            finally
+            {
+                finalCount = DBSearchResult.GetIndexedPageTotals(siteIndexID);
+
             }
 
             return Json(finalCount, JsonRequestBehavior.AllowGet);

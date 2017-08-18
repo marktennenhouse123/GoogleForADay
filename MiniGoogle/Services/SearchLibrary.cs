@@ -61,59 +61,16 @@ namespace MiniGoogle.Services
             }
         }
 
-        /// <summary>
-        /// Load a page and then extract the links and text from a single page.
+        /// <summary>GetLinksAndKeywords
+        ///  the content of the page is loaded. So extract the links and text from a single page.
         /// //then load all of them into the main container= ContentSearchResult
         ///Main Object-ContentSearchResult: Container object for all the properties.
-        /////This method loads and then passes the container to the save method. 
-        //this saves all the links, and keywords 
+        /////This method loads and then passes the container to the save method later. 
+        //Extracts links, title, and converts html to text content
+        /// then counts up the keywords from the content.
         /// </summary>
-        /// <param name="pageURL"></param>
-        /// <returns></returns>
-        public static ContentSearchResult CreateIndexForPageOLD(string pageURL, int parentID, int siteIndexID)
-        {
-            ContentSearchResult searchResult = null;
-            //check if this page has been indexed BEFORE getting the content.
-            try
-            {
-                 searchResult = new ContentSearchResult();
-                searchResult.ParentID = parentID;
-                searchResult.PageName = GetFilenameFromURL(pageURL);
-                searchResult.IndexedSiteID = siteIndexID;
-                if (!DBSearchResult.IsPageContentIndexed(pageURL, searchResult.PageName))
-                {
-                    searchResult.SearchContent = GetPageContent(pageURL);
-
-                    searchResult.Title = GetPageTitle(searchResult.SearchContent, searchResult.PageName);
-                    searchResult.ParentDirectory = GetDirectoryForFile(pageURL, parentID);
-                    searchResult.PageURL = pageURL;
-                    searchResult.TextContent = GetTextFromHTML(searchResult.SearchContent);
-
-                    //use the full page content to extract the links
-                    searchResult.Links = GetLinks(searchResult.SearchContent);
-
-                    //use ONLY the cleaned text to find the keyword ranking.
-                    searchResult.KeyWordRankingList = GetKeywordCounts(searchResult.TextContent);
-
-                    // save the results to the database for the Links and the Keyword ranking.
-                    int newPageID = DBSearchResult.SaveSearchResults(searchResult);
-                    searchResult.PageID = newPageID;
-                }
-                return searchResult;
-            }
-            catch (DbEntityValidationException ex)
-            {
-                string data = Services.SerializeIt.SerializeThis(searchResult);
-                MessageLogger.LogThis(ex, data);
-                return null;
-            }
-            catch (Exception ex)
-            {
-                MessageLogger.LogThis(ex);
-                return null;
-            }
-        }
-
+        /// <param name="ContentSearchResult"></param>
+     
         public static void GetLinksAndKeywords(ContentSearchResult sr)
         {
             
